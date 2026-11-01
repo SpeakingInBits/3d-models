@@ -24,7 +24,27 @@ Print tips: set the seam to *Rear* or *Aligned* so the threads turn smoothly.
 ## Stickers
 
 Every recess is 40 × 30 mm and 1.5 mm deep with 4 mm corner radii. Use **38 × 28 mm** stickers
-with rounded corners. The cup has 8 spots and the lid has 4, for 12 in total.
+with 3 mm rounded corners. The cup has 8 spots and the lid has 4, for 12 in total.
+
+### Photoshop template (Cricut Print Then Cut)
+
+[stickers/sticker_template.psd](stickers/sticker_template.psd) is one sticker at 38 × 28 mm,
+300 DPI. The **Sticker** group is masked to the cut shape, so anything you put in it is trimmed
+to the rounded corners.
+
+1. Open the PSD. With the *Your design* layer selected, use **File > Place Embedded** so the
+   artwork lands inside the group. Keep text and faces inside the pink safe-area line, since
+   the cut can drift about 1 mm.
+2. Hide the *GUIDE: safe area* layer.
+3. **File > Export > Export As**, PNG with transparency on. Save one PNG per sticker.
+4. In Cricut Design Space, upload the PNG as a **Print Then Cut** image. The transparent
+   corners become the cut line.
+5. On the canvas, lock the proportions and set the width to **38 mm (1.5 in)**. Leave the
+   print bleed on, then print and cut on sticker paper.
+
+To change the sticker size, edit the numbers at the top of
+[stickers/sticker_template.jsx](stickers/sticker_template.jsx) and run it in Photoshop with
+**File > Scripts > Browse**. It rebuilds the PSD and the preview next to itself.
 
 ## Threads
 
