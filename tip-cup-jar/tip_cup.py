@@ -1,4 +1,4 @@
-"""Coffee-cup tip jar: threaded cup, screw-on lid with money slot, and a slide-on sleeve.
+"""Coffee-cup tip jar: threaded cup and a screw-on lid with a money slot.
 
 All dimensions are in millimetres. Change the parameters below and re-run from the repo root:
 
@@ -6,33 +6,25 @@ All dimensions are in millimetres. Change the parameters below and re-run from t
 
 Outputs go to tip-cup-jar/out:
     cup.stl     - print upright, no supports
-    lid.stl     - already flipped top-down for printing, no supports (fits both cups)
-    sleeve.stl  - print upright, no supports (slides on from the bottom of the cup)
-    cup_short.stl - shorter cup without a sleeve, same 8 sticker spots
-    tip_cup_assembly.step / tip_cup_short_assembly.step - assembled, for other CAD tools
+    lid.stl     - already flipped top-down for printing, no supports
+    tip_cup_assembly.step - cup and lid assembled, for viewing/editing in other CAD tools
 """
 
 from math import cos, sin, radians, sqrt
 from pathlib import Path
 
 from build123d import (
-    Axis, Circle, Compound, FontStyle, Location, Plane, Polyline, Pos, Rectangle,
-    RectangleRounded, Rot, SlotOverall, Solid, Text, Vector, export_step, export_stl,
-    extrude, make_face, revolve,
+    Axis, Compound, Plane, Polyline, Pos, RectangleRounded, Rot, SlotOverall, Solid, Vector,
+    export_step, export_stl, extrude, make_face, revolve,
 )
 from bd_warehouse.thread import Thread
 
 # ---------------------------------------------------------------- cup body
-CUP_H = 150.0          # height of the tapered body (shoulder sits at the top of it)
-CUP_R_BOTTOM = 35.0    # outer radius at the base
+CUP_H = 86.0           # height of the tapered body (shoulder sits at the top of it)
+CUP_R_BOTTOM = 38.8    # outer radius at the base
 CUP_R_TOP = 44.0       # outer radius at the shoulder
 CUP_WALL = 3.2
 CUP_FLOOR = 3.0
-
-# ---------------------------------------------------------------- short cup (no sleeve)
-SHORT_CUP_H = 86.0
-SHORT_CUP_R_BOTTOM = 38.8                  # keeps the same taper as the tall cup
-SHORT_CUP_SPOT_ROWS_Z = (24.0, 61.0)
 
 # ---------------------------------------------------------------- threaded neck
 NECK_H = 16.0          # neck height above the shoulder
@@ -50,21 +42,10 @@ EXT_ROOT_W = EXT_APEX_W + 2 * THREAD_DEPTH
 # ---------------------------------------------------------------- sticker spots
 STICKER_DEPTH = 1.5
 CUP_SPOT_W, CUP_SPOT_H, SPOT_CORNER_R = 40.0, 30.0, 4.0
-CUP_SPOT_ROWS_Z = (27.0, 129.0)            # centre heights of the two rows
+CUP_SPOT_ROWS_Z = (24.0, 61.0)             # centre heights of the two rows
 CUP_SPOT_ANGLES = (45, 135, 225, 315)      # front of the cup faces -Y (270 deg)
 LID_SPOT_W, LID_SPOT_H = CUP_SPOT_W, CUP_SPOT_H  # one sticker size for everything
 LID_SPOT_ANGLES = CUP_SPOT_ANGLES                 # lined up with the cup's columns
-
-# ---------------------------------------------------------------- sleeve
-SLEEVE_Z0, SLEEVE_Z1 = 50.0, 106.0
-SLEEVE_THICK = 2.4
-SLEEVE_CLEARANCE = 0.15  # radial; the taper makes it wedge tight as it slides up
-SLEEVE_TEXT = ("Tips", "Make", "Better", "Days")  # set to () for a plain sleeve
-SLEEVE_FONT = "Georgia"
-SLEEVE_FONT_SIZE = 10.0
-SLEEVE_LINE_PITCH = 10.2
-SLEEVE_HEART = True
-EMBOSS = 0.8
 
 # ---------------------------------------------------------------- lid
 LID_LIP_R = 47.5       # outer radius of the rim band
@@ -80,9 +61,9 @@ SLOT_L, SLOT_W = 50.0, 5.0
 OUT = Path(__file__).parent / "out"
 
 
-def cup_r(z, height=CUP_H, r_bottom=CUP_R_BOTTOM):
+def cup_r(z):
     """Outer radius of the tapered cup body at height z."""
-    return r_bottom + (CUP_R_TOP - r_bottom) * z / height
+    return CUP_R_BOTTOM + (CUP_R_TOP - CUP_R_BOTTOM) * z / CUP_H
 
 
 def lid_r(z):
@@ -122,20 +103,19 @@ def multi_start_thread(**kwargs):
 
 
 # ------------------------------------------------------------------- cup
-def build_cup(height=CUP_H, r_bottom=CUP_R_BOTTOM, spot_rows_z=CUP_SPOT_ROWS_Z):
+def build_cup():
     w, fl = CUP_WALL, CUP_FLOOR
-    top = height + NECK_H
-    r = lambda z: cup_r(z, height, r_bottom)
+    top = CUP_H + NECK_H
     # inner wall follows the outer taper, then steps in to the neck at 45 deg
-    z_step = height - ((r(height) - w) - (NECK_R - NECK_WALL))
+    z_step = CUP_H - ((cup_r(CUP_H) - w) - (NECK_R - NECK_WALL))
     r_neck_in = NECK_R - NECK_WALL
     pts = [
-        (0, 0), (r_bottom - 1.0, 0), (r(1.0), 1.0),                   # base chamfer
-        (r(height), height), (NECK_R, height),                        # shoulder
+        (0, 0), (CUP_R_BOTTOM - 1.0, 0), (cup_r(1.0), 1.0),          # base chamfer
+        (cup_r(CUP_H), CUP_H), (NECK_R, CUP_H),                       # shoulder
         (NECK_R, top - 0.8), (NECK_R - 0.8, top),                     # neck top chamfer
-        (r_neck_in, top), (r_neck_in, height),
-        (r(z_step) - w, z_step),
-        (r(fl) - w, fl), (0, fl),
+        (r_neck_in, top), (r_neck_in, CUP_H),
+        (cup_r(z_step) - w, z_step),
+        (cup_r(fl) - w, fl), (0, fl),
     ]
     cup = revolve_profile(pts)
 
@@ -146,55 +126,14 @@ def build_cup(height=CUP_H, r_bottom=CUP_R_BOTTOM, spot_rows_z=CUP_SPOT_ROWS_Z):
         length=thread_len, end_finishes=("fade", "fade"),
     )
     for t in threads:
-        cup += Pos(0, 0, height + 1.8) * t
+        cup += Pos(0, 0, CUP_H + 1.8) * t
 
-    shell = cone_shell(r_bottom, CUP_R_TOP, 0, height, STICKER_DEPTH, 5)
+    shell = cone_shell(CUP_R_BOTTOM, CUP_R_TOP, 0, CUP_H, STICKER_DEPTH, 5)
     spot = lambda: RectangleRounded(CUP_SPOT_W, CUP_SPOT_H, SPOT_CORNER_R)
-    for zc in spot_rows_z:
+    for zc in CUP_SPOT_ROWS_Z:
         for ang in CUP_SPOT_ANGLES:
             cup -= radial_prism(spot, ang, zc, CUP_R_TOP + 10) & shell
     return cup
-
-
-# ------------------------------------------------------------------- sleeve
-def heart(size):
-    """Heart shape centred roughly on the origin, about 1.55 * size tall."""
-    h = size / (2 * sqrt(2))
-    body = Rot(0, 0, 45) * Rectangle(size, size)
-    return body + Pos(-h, h) * Circle(size / 2) + Pos(h, h) * Circle(size / 2)
-
-
-def sleeve_label():
-    lines = list(SLEEVE_TEXT)
-    n = len(lines) + (1 if SLEEVE_HEART else 0)
-    heart_size = SLEEVE_FONT_SIZE * 0.45
-    # stack lines top to bottom, centred on the sketch origin
-    y = (n - 1) * SLEEVE_LINE_PITCH / 2
-    sk = None
-    for line in lines:
-        txt = Pos(0, y) * Text(line, SLEEVE_FONT_SIZE, font=SLEEVE_FONT,
-                               font_style=FontStyle.BOLD)
-        sk = txt if sk is None else sk + txt
-        y -= SLEEVE_LINE_PITCH
-    if SLEEVE_HEART:
-        hrt = Pos(0, y - SLEEVE_LINE_PITCH * 0.15) * heart(heart_size)  # clear descenders
-        sk = hrt if sk is None else sk + hrt
-    return Pos(0, -sk.bounding_box().center().Y) * sk
-
-
-def build_sleeve():
-    c, t = SLEEVE_CLEARANCE, SLEEVE_THICK
-    z0, z1, ch = SLEEVE_Z0, SLEEVE_Z1, 0.6
-    ri0, ri1 = cup_r(z0) + c, cup_r(z1) + c
-    pts = [
-        (ri0, z0), (ri0 + t - ch, z0), (ri0 + t, z0 + ch),
-        (ri1 + t, z1 - ch), (ri1 + t - ch, z1), (ri1, z1),
-    ]
-    sleeve = revolve_profile(pts)
-    if SLEEVE_TEXT or SLEEVE_HEART:
-        shell = cone_shell(ri0 + t, ri1 + t, z0, z1, 0.3, EMBOSS)
-        sleeve += radial_prism(sleeve_label, 270, (z0 + z1) / 2, CUP_R_TOP + 10) & shell
-    return sleeve
 
 
 # ------------------------------------------------------------------- lid
@@ -245,28 +184,19 @@ def main():
     OUT.mkdir(exist_ok=True)
     print("building cup...")
     cup = build_cup()
-    print("building sleeve...")
-    sleeve = build_sleeve()
     print("building lid...")
     lid = build_lid()
-    print("building short cup...")
-    cup_short = build_cup(SHORT_CUP_H, SHORT_CUP_R_BOTTOM, SHORT_CUP_SPOT_ROWS_Z)
 
-    for name, part in (("cup", cup), ("sleeve", sleeve), ("lid", lid),
-                       ("cup_short", cup_short)):
+    for name, part in (("cup", cup), ("lid", lid)):
         print(f"  {name}: valid={part.is_valid}, volume={part.volume / 1000:.1f} cm^3")
 
     lid_print = Rot(180, 0, 0) * lid
     lid_print = Pos(0, 0, -lid_print.bounding_box().min.Z) * lid_print
     export_stl(cup, OUT / "cup.stl", tolerance=0.01, angular_tolerance=0.1)
-    export_stl(sleeve, OUT / "sleeve.stl", tolerance=0.01, angular_tolerance=0.1)
     export_stl(lid_print, OUT / "lid.stl", tolerance=0.01, angular_tolerance=0.1)
-    export_stl(cup_short, OUT / "cup_short.stl", tolerance=0.01, angular_tolerance=0.1)
 
-    assembly = Compound(children=[cup, sleeve, Pos(0, 0, CUP_H) * lid])
+    assembly = Compound(children=[cup, Pos(0, 0, CUP_H) * lid])
     export_step(assembly, OUT / "tip_cup_assembly.step")
-    short_assembly = Compound(children=[cup_short, Pos(0, 0, SHORT_CUP_H) * lid])
-    export_step(short_assembly, OUT / "tip_cup_short_assembly.step")
     print("done ->", OUT)
 
 

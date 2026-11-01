@@ -1,31 +1,30 @@
 # Tip Cup Jar
 
 A coffee-cup tip jar with a screw-on lid, a money slot for coins and folded bills, and
-recessed spots for stickers. It comes in two versions that share the same lid:
+recessed spots for stickers.
 
-| Tall cup with sleeve | Short cup, no sleeve |
+| Assembled | Exploded |
 |---|---|
-| ![Tall cup](out/preview_front.png) | ![Short cup](out/preview_short_angle.png) |
+| ![Tip cup jar](out/preview_angle.png) | ![Exploded view](out/preview_exploded.png) |
 
 ## Files to print
 
-All parts print without supports. Designed for a Prusa MK4 printing PETG (not yet test-printed).
+Both parts print without supports. Designed for a Prusa MK4 printing PETG (not yet test-printed).
 
 | File | Notes |
 |---|---|
-| [out/lid.stl](out/lid.stl) | Already flipped top-down for printing. Fits both cups. |
-| [out/cup.stl](out/cup.stl) | Tall cup, 166 mm. Print upright. |
-| [out/sleeve.stl](out/sleeve.stl) | For the tall cup. Print in a second colour; slides on from the bottom and wedges on the taper. |
-| [out/cup_short.stl](out/cup_short.stl) | Short cup, 102 mm, no sleeve. Print upright. |
+| [out/cup.stl](out/cup.stl) | 88 mm wide, 102 mm tall. Print upright. |
+| [out/lid.stl](out/lid.stl) | Already flipped top-down for printing. |
 
-STEP assemblies for other CAD tools: [tall](out/tip_cup_assembly.step), [short](out/tip_cup_short_assembly.step).
+The assembled jar is about 143 mm tall. A STEP assembly for other CAD tools is in
+[out/tip_cup_assembly.step](out/tip_cup_assembly.step).
 
 Print tips: set the seam to *Rear* or *Aligned* so the threads turn smoothly.
 
 ## Stickers
 
 Every recess is 40 × 30 mm and 1.5 mm deep with 4 mm corner radii. Use **38 × 28 mm** stickers
-with rounded corners. Each cup has 8 spots and the lid has 4, for 12 per assembled jar.
+with rounded corners. The cup has 8 spots and the lid has 4, for 12 in total.
 
 ## Threads
 
@@ -39,8 +38,8 @@ If the lid is too tight or loose on your printer, change `THREAD_AXIAL_GAP` (and
 ## Customising
 
 Every dimension is a parameter at the top of [tip_cup.py](tip_cup.py): cup height and taper,
-sticker spot size and positions, sleeve text, slot size and thread fit. Rebuild and re-render
-from the repo root:
+sticker spot size and positions, slot size and thread fit. Rebuild and re-render from the
+repo root:
 
 ```bash
 .venv/Scripts/python tip-cup-jar/tip_cup.py
