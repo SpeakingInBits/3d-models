@@ -1,0 +1,23 @@
+# 3D Models
+
+Parametric, 3D-printable models written in Python with [build123d](https://github.com/gumyr/build123d).
+Each model lives in its own folder with its source script, ready-to-print STLs and preview renders.
+
+| Model | Description |
+|---|---|
+| [tip-cup-jar](tip-cup-jar/) | Coffee-cup tip jar with a screw-on coin-slot lid and recessed sticker spots |
+
+## Setup
+
+Requires Python 3.12 (Windows commands shown).
+
+```bash
+python -m venv .venv
+.venv/Scripts/python -m pip install -r requirements.txt
+```
+
+Then run a model's script from the repo root, for example:
+
+```bash
+.venv/Scripts/python tip-cup-jar/tip_cup.py
+```

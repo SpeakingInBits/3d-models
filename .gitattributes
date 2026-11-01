@@ -1,0 +1,4 @@
+# Model outputs: keep byte-for-byte, no line-ending conversion or text diffs
+*.stl binary
+*.step binary
+*.png binary
