@@ -28,23 +28,21 @@ with 3 mm rounded corners. The cup has 8 spots and the lid has 4, for 12 in tota
 
 ### Photoshop template (Cricut Print Then Cut)
 
-[stickers/sticker_template.psd](stickers/sticker_template.psd) is one sticker at 38 × 28 mm,
-300 DPI. The **Sticker** group is masked to the cut shape, so anything you put in it is trimmed
-to the rounded corners.
+[stickers/sticker_template.psd](stickers/sticker_template.psd) is one sticker at exactly
+38 × 28 mm, 300 DPI, with no bleed or margins. The **Sticker** group is masked to the rounded
+corners, so anything you put in it is trimmed to the sticker shape.
 
 1. Open the PSD. With the *Your design* layer selected, use **File > Place Embedded** so the
-   artwork lands inside the group. Keep text and faces inside the pink safe-area line, since
-   the cut can drift about 1 mm.
-2. Hide the *GUIDE: safe area* layer.
-3. **File > Export > Export As**, PNG with transparency on. Save one PNG per sticker.
-4. In Cricut Design Space, upload the PNG as a **Print Then Cut** image. The transparent
+   artwork lands inside the group.
+2. **File > Export > Export As**, PNG with transparency on. Save one PNG per sticker.
+3. In Cricut Design Space, upload the PNG as a **Print Then Cut** image. The transparent
    corners become the cut line.
-5. On the canvas, lock the proportions and set the width to **38 mm (1.5 in)**. Leave the
-   print bleed on, then print and cut on sticker paper.
+4. On the canvas, lock the proportions and set the width to **38 mm (1.5 in)**, then print
+   and cut on sticker paper.
 
 To change the sticker size, edit the numbers at the top of
 [stickers/sticker_template.jsx](stickers/sticker_template.jsx) and run it in Photoshop with
-**File > Scripts > Browse**. It rebuilds the PSD and the preview next to itself.
+**File > Scripts > Browse**. It rebuilds the PSD next to itself.
 
 ## Threads
 

@@ -1,9 +1,8 @@
 // Builds a Photoshop template for one tip cup sticker, sized for Cricut Print Then Cut.
 //
-// Run it in Photoshop with File > Scripts > Browse... It saves next to this script:
-//   sticker_template.psd          - put your design inside the "Sticker" group; the group is
-//                                   masked to the cut shape, so anything you add is trimmed to it
-//   sticker_template_preview.png  - what the empty template looks like, for the README
+// Run it in Photoshop with File > Scripts > Browse... It saves sticker_template.psd next to
+// this script. Put your design inside the "Sticker" group; the group is masked to the cut
+// shape, so anything you add is trimmed to the rounded corners.
 //
 // Every recess on the cup and lid is 40 x 30 mm with 4 mm corners. The sticker is 1 mm smaller
 // all round so Cricut's cut tolerance still leaves it inside the recess.
@@ -12,7 +11,6 @@
 var STICKER_W_MM = 38;
 var STICKER_H_MM = 28;
 var CORNER_R_MM = 3;   // concentric with the recess's 4 mm corners
-var SAFE_MM = 2;       // keep text and faces inside this margin
 var DPI = 300;
 
 function cTID(s) { return charIDToTypeID(s); }
@@ -28,14 +26,14 @@ function pathPoint(anchor, inDir, outDir) {
     return p;
 }
 
-// Selects a rounded rectangle inset from the canvas edges (all values in pixels).
-// Built from a temporary path because the radius on a plain rectangle selection is
-// ignored by current Photoshop versions.
-function selectRoundedRect(inset, radius) {
+// Selects the whole canvas with rounded corners (radius in pixels). Built from a temporary
+// path because the radius on a plain rectangle selection is ignored by current Photoshop
+// versions.
+function selectRoundedRect(radius) {
     var doc = app.activeDocument;
     var s = 72 / doc.resolution;   // path coordinates are in points, not pixels
-    var l = inset * s, t = inset * s, r = radius * s, k = r * 0.5523;
-    var rt = (doc.width.as("px") - inset) * s, b = (doc.height.as("px") - inset) * s;
+    var l = 0, t = 0, r = radius * s, k = r * 0.5523;
+    var rt = doc.width.as("px") * s, b = doc.height.as("px") * s;
     var pts = [
         pathPoint([l + r, t], [l + r - k, t], [l + r, t]),
         pathPoint([rt - r, t], [rt - r, t], [rt - r + k, t]),
@@ -76,7 +74,6 @@ function rgb(r, g, b) {
 function buildTemplate(outFolder) {
     var w = Math.round(px(STICKER_W_MM));
     var h = Math.round(px(STICKER_H_MM));
-    var safe = px(SAFE_MM);
     var doc = app.documents.add(w, h, DPI, "sticker_template", NewDocumentMode.RGB,
                                 DocumentFill.TRANSPARENT);
     var starter = doc.activeLayer;
@@ -93,35 +90,16 @@ function buildTemplate(outFolder) {
     design.name = "Your design (place artwork here)";
 
     doc.activeLayer = group;
-    selectRoundedRect(0, px(CORNER_R_MM));
+    selectRoundedRect(px(CORNER_R_MM));
     addLayerMaskFromSelection();
     doc.selection.deselect();
-
-    // Safe-area outline, outside the group so it never prints.
-    doc.activeLayer = group;
-    var guide = doc.artLayers.add();
-    guide.name = "GUIDE: safe area (hide before export)";
-    guide.move(doc, ElementPlacement.PLACEATBEGINNING);
-    selectRoundedRect(safe, Math.max(px(CORNER_R_MM - SAFE_MM), 1));
-    doc.selection.stroke(rgb(255, 0, 170), 2, StrokeLocation.CENTER);
-    doc.selection.deselect();
     starter.remove();
-
-    doc.guides.add(Direction.VERTICAL, UnitValue(safe, "px"));
-    doc.guides.add(Direction.VERTICAL, UnitValue(w - safe, "px"));
-    doc.guides.add(Direction.VERTICAL, UnitValue(w / 2, "px"));
-    doc.guides.add(Direction.HORIZONTAL, UnitValue(safe, "px"));
-    doc.guides.add(Direction.HORIZONTAL, UnitValue(h - safe, "px"));
-    doc.guides.add(Direction.HORIZONTAL, UnitValue(h / 2, "px"));
 
     doc.activeLayer = design;   // so File > Place lands inside the group
     var psd = new PhotoshopSaveOptions();
     psd.layers = true;
     psd.embedColorProfile = true;
     doc.saveAs(new File(outFolder + "/sticker_template.psd"), psd, false);
-    var png = new PNGSaveOptions();
-    png.compression = 9;
-    doc.saveAs(new File(outFolder + "/sticker_template_preview.png"), png, true);
     return doc;
 }
 
