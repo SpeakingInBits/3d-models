@@ -6,6 +6,7 @@ Each model lives in its own folder with its source script, ready-to-print STLs a
 | Model | Description |
 |---|---|
 | [tip-cup-jar](tip-cup-jar/) | Coffee-cup tip jar with a screw-on coin-slot lid and recessed sticker spots |
+| [phone-stand](phone-stand/) | Charging stand for an iPhone 14 Pro Max on MagSafe with an Apple Watch charger pad |
 
 ## Setup
 
