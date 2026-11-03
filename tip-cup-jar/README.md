@@ -1,7 +1,7 @@
 # Tip Cup Jar
 
-A coffee-cup tip jar with a screw-on lid, a money slot for coins and folded bills, and
-recessed spots for stickers.
+A coffee-cup tip jar with a screw-on lid, a 50 × 10 mm money slot for coins and folded bills,
+and recessed spots for stickers.
 
 | Assembled | Exploded |
 |---|---|
