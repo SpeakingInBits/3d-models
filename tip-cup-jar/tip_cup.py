@@ -63,7 +63,7 @@ LID_TOP_Z = 57.0
 LID_TOP_R = 33.0
 LID_WALL = 3.2
 LID_TOP_CHAMFER = 2.0
-SLOT_L, SLOT_W = 50.0, 5.0
+SLOT_L, SLOT_W = 50.0, 10.0  # wide enough that folded bills and coins drop in easily
 
 OUT = Path(__file__).parent / "out"
 
