@@ -1,15 +1,18 @@
-// Builds a Photoshop template for one tip cup sticker, sized for Cricut Print Then Cut.
+// Builds Photoshop templates for the tip cup stickers, sized for Cricut Print Then Cut.
 //
-// Run it in Photoshop with File > Scripts > Browse... It saves sticker_template.psd next to
-// this script. Put your design inside the "Sticker" group; the group is masked to the cut
-// shape, so anything you add is trimmed to the rounded corners.
+// Run it in Photoshop with File > Scripts > Browse... It saves one PSD per entry in STICKERS
+// next to this script. Put your design inside the "Sticker" group; the group is masked to the
+// cut shape, so anything you add is trimmed to the rounded corners.
 //
-// Every recess on the cup and lid is 40 x 30 mm with 4 mm corners. The sticker is 1 mm smaller
+// Use the sticker sizes tip_cup.py prints. With the default settings the cup's recesses are
+// 27 x 36 mm and the lid's are 24 x 32 mm, all with 4 mm corners. Each sticker is 1 mm smaller
 // all round so Cricut's cut tolerance still leaves it inside the recess.
 #target photoshop
 
-var STICKER_W_MM = 38;
-var STICKER_H_MM = 28;
+var STICKERS = [
+    { name: "sticker_cup", w: 25, h: 34 },
+    { name: "sticker_lid", w: 22, h: 30 }
+];
 var CORNER_R_MM = 3;   // concentric with the recess's 4 mm corners
 var DPI = 300;
 
@@ -71,10 +74,10 @@ function rgb(r, g, b) {
     return c;
 }
 
-function buildTemplate(outFolder) {
-    var w = Math.round(px(STICKER_W_MM));
-    var h = Math.round(px(STICKER_H_MM));
-    var doc = app.documents.add(w, h, DPI, "sticker_template", NewDocumentMode.RGB,
+function buildTemplate(outFolder, sticker) {
+    var w = Math.round(px(sticker.w));
+    var h = Math.round(px(sticker.h));
+    var doc = app.documents.add(w, h, DPI, sticker.name, NewDocumentMode.RGB,
                                 DocumentFill.TRANSPARENT);
     var starter = doc.activeLayer;
 
@@ -99,7 +102,7 @@ function buildTemplate(outFolder) {
     var psd = new PhotoshopSaveOptions();
     psd.layers = true;
     psd.embedColorProfile = true;
-    doc.saveAs(new File(outFolder + "/sticker_template.psd"), psd, false);
+    doc.saveAs(new File(outFolder + "/" + sticker.name + ".psd"), psd, false);
     return doc;
 }
 
@@ -109,7 +112,9 @@ function buildTemplate(outFolder) {
     app.preferences.rulerUnits = Units.PIXELS;
     app.displayDialogs = DialogModes.NO;
     try {
-        buildTemplate(File($.fileName).parent.fsName);
+        for (var i = 0; i < STICKERS.length; i++) {
+            buildTemplate(File($.fileName).parent.fsName, STICKERS[i]);
+        }
     } finally {
         app.preferences.rulerUnits = units;
         app.displayDialogs = dialogs;

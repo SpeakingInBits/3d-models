@@ -10,7 +10,7 @@ Outputs go to tip-cup-jar/out:
     tip_cup_assembly.step - cup and lid assembled, for viewing/editing in other CAD tools
 """
 
-from math import cos, sin, radians, sqrt
+from math import cos, floor, pi, sin, radians, sqrt
 from pathlib import Path
 
 from build123d import (
@@ -40,12 +40,19 @@ EXT_APEX_W = 0.6
 EXT_ROOT_W = EXT_APEX_W + 2 * THREAD_DEPTH
 
 # ---------------------------------------------------------------- sticker spots
+# Portrait spots shaped like a phone photo. Each spot is sized automatically to the largest
+# whole-millimetre size that fits the counts below, so more spots means smaller spots.
 STICKER_DEPTH = 1.5
-CUP_SPOT_W, CUP_SPOT_H, SPOT_CORNER_R = 40.0, 30.0, 4.0
-CUP_SPOT_ROWS_Z = (24.0, 61.0)             # centre heights of the two rows
-CUP_SPOT_ANGLES = (45, 135, 225, 315)      # front of the cup faces -Y (270 deg)
-LID_SPOT_W, LID_SPOT_H = CUP_SPOT_W, CUP_SPOT_H  # one sticker size for everything
-LID_SPOT_ANGLES = CUP_SPOT_ANGLES                 # lined up with the cup's columns
+SPOT_ASPECT = 4 / 3      # height / width: 4/3 is a phone photo held upright, 16/9 a screenshot
+SPOT_CORNER_R = 4.0
+SPOT_GAP = 4.0           # minimum space between neighbouring spots
+SPOT_START_ANGLE = 45    # angle of the first column; the front of the cup faces -Y (270 deg)
+CUP_SPOT_COLUMNS = 4     # spots around the cup
+CUP_SPOT_ROWS = 2
+CUP_SPOT_MARGIN = 5.0    # space kept clear at the base and below the shoulder
+LID_SPOTS = 4            # spots around the lid; lined up with the cup's columns when equal
+LID_SPOT_MARGIN = 3.0    # space kept clear at the bottom and top of the lid's sloped face
+SAME_SPOT_SIZE = False   # True shrinks the larger spots to match, so every sticker is one size
 
 # ---------------------------------------------------------------- lid
 LID_LIP_R = 47.5       # outer radius of the rim band
@@ -96,6 +103,52 @@ def cone_shell(r0, r1, z0, z1, inner_off, outer_off):
     return outer - inner
 
 
+def cup_spot_band():
+    """Lowest and highest z the cup's spots may reach."""
+    return CUP_SPOT_MARGIN, CUP_H - CUP_SPOT_MARGIN
+
+
+def lid_spot_band():
+    """Lowest and highest lid z the lid's spots may reach."""
+    return LID_FRUSTUM_Z0 + LID_SPOT_MARGIN, LID_TOP_Z - LID_TOP_CHAMFER - LID_SPOT_MARGIN
+
+
+def spot_angles(count):
+    return [SPOT_START_ANGLE + 360 * i / count for i in range(count)]
+
+
+def fit_spot_width(count, r, height):
+    """Widest portrait spot, in whole mm, that fits count around radius r and within height.
+
+    The flat spot is projected straight onto the surface, so its angular span is 2*asin(w/2r);
+    past 60 degrees either side the projection smears too much to be worth it.
+    """
+    half_angle = min(pi / count - SPOT_GAP / (2 * r), pi / 3)
+    return floor(min(2 * r * sin(half_angle), height / SPOT_ASPECT))
+
+
+def spot_sizes():
+    """{"cup": (w, h), "lid": (w, h)} for each part that has spots."""
+    widths = {}
+    if CUP_SPOT_COLUMNS and CUP_SPOT_ROWS:
+        lo, hi = cup_spot_band()
+        row_h = (hi - lo - (CUP_SPOT_ROWS - 1) * SPOT_GAP) / CUP_SPOT_ROWS
+        widths["cup"] = fit_spot_width(CUP_SPOT_COLUMNS, cup_r(lo), row_h)
+    if LID_SPOTS:
+        lo, hi = lid_spot_band()
+        widths["lid"] = fit_spot_width(LID_SPOTS, lid_r(hi), hi - lo)  # narrowest at the top
+    if SAME_SPOT_SIZE and widths:
+        widths = dict.fromkeys(widths, min(widths.values()))
+
+    sizes = {}
+    for part, w in widths.items():
+        if w < 2 * SPOT_CORNER_R + 2:
+            raise ValueError(f"{part} spots would only be {w} mm wide; "
+                             "use fewer spots, a smaller SPOT_GAP or smaller margins")
+        sizes[part] = (w, floor(w * SPOT_ASPECT + 1e-9))
+    return sizes
+
+
 def multi_start_thread(**kwargs):
     lead = THREAD_PITCH * THREAD_STARTS
     starts = [Thread(pitch=lead, **kwargs) for _ in range(THREAD_STARTS)]
@@ -128,10 +181,19 @@ def build_cup():
     for t in threads:
         cup += Pos(0, 0, CUP_H + 1.8) * t
 
+    size = spot_sizes().get("cup")
+    if size is None:
+        return cup
+    w, h = size
+    # rows are packed SPOT_GAP apart and centred in the band
+    lo, hi = cup_spot_band()
+    block_h = CUP_SPOT_ROWS * h + (CUP_SPOT_ROWS - 1) * SPOT_GAP
+    z_first = (lo + hi - block_h) / 2 + h / 2
     shell = cone_shell(CUP_R_BOTTOM, CUP_R_TOP, 0, CUP_H, STICKER_DEPTH, 5)
-    spot = lambda: RectangleRounded(CUP_SPOT_W, CUP_SPOT_H, SPOT_CORNER_R)
-    for zc in CUP_SPOT_ROWS_Z:
-        for ang in CUP_SPOT_ANGLES:
+    spot = lambda: RectangleRounded(w, h, SPOT_CORNER_R)
+    for row in range(CUP_SPOT_ROWS):
+        zc = z_first + row * (h + SPOT_GAP)
+        for ang in spot_angles(CUP_SPOT_COLUMNS):
             cup -= radial_prism(spot, ang, zc, CUP_R_TOP + 10) & shell
     return cup
 
@@ -171,17 +233,25 @@ def build_lid():
 
     lid -= Pos(0, 0, LID_TOP_Z) * extrude(SlotOverall(SLOT_L, SLOT_W), amount=10, both=True)
 
+    size = spot_sizes().get("lid")
+    if size is None:
+        return lid
+    w, h = size
     shell = cone_shell(LID_FRUSTUM_R0, LID_TOP_R, LID_FRUSTUM_Z0, LID_TOP_Z,
                        STICKER_DEPTH * sqrt(1 + slope**2), 5)
-    spot = lambda: RectangleRounded(LID_SPOT_W, LID_SPOT_H, SPOT_CORNER_R)
-    zc = (LID_FRUSTUM_Z0 + LID_TOP_Z - LID_TOP_CHAMFER) / 2
-    for ang in LID_SPOT_ANGLES:
+    spot = lambda: RectangleRounded(w, h, SPOT_CORNER_R)
+    zc = sum(lid_spot_band()) / 2
+    for ang in spot_angles(LID_SPOTS):
         lid -= radial_prism(spot, ang, zc, LID_LIP_R + 10) & shell
     return lid
 
 
 def main():
     OUT.mkdir(exist_ok=True)
+    counts = {"cup": f"{CUP_SPOT_COLUMNS} x {CUP_SPOT_ROWS}", "lid": f"{LID_SPOTS}"}
+    for part, (w, h) in spot_sizes().items():
+        # stickers are 1 mm smaller all round so Cricut's cut tolerance stays inside the recess
+        print(f"{part} spots: {counts[part]} at {w} x {h} mm -> {w - 2} x {h - 2} mm stickers")
     print("building cup...")
     cup = build_cup()
     print("building lid...")

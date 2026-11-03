@@ -23,26 +23,55 @@ Print tips: set the seam to *Rear* or *Aligned* so the threads turn smoothly.
 
 ## Stickers
 
-Every recess is 40 × 30 mm and 1.5 mm deep with 4 mm corner radii. Use **38 × 28 mm** stickers
-with 3 mm rounded corners. The cup has 8 spots and the lid has 4, for 12 in total.
+The recesses are portrait, shaped like a phone photo held upright. Every recess is 1.5 mm deep
+with 4 mm corner radii, and stickers are 1 mm smaller all round with 3 mm rounded corners. With
+the default settings:
 
-### Photoshop template (Cricut Print Then Cut)
+| Part | Spots | Recess | Sticker |
+|---|---|---|---|
+| Cup | 8 (4 around, 2 rows) | 27 × 36 mm | **25 × 34 mm** |
+| Lid | 4 | 24 × 32 mm | **22 × 30 mm** |
 
-[stickers/sticker_template.psd](stickers/sticker_template.psd) is one sticker at exactly
-38 × 28 mm, 300 DPI, with no bleed or margins. The **Sticker** group is masked to the rounded
-corners, so anything you put in it is trimmed to the sticker shape.
+### Changing the spots
+
+Set these at the top of [tip_cup.py](tip_cup.py):
+
+| Parameter | Default | What it does |
+|---|---|---|
+| `CUP_SPOT_COLUMNS` | 4 | Spots around the cup |
+| `CUP_SPOT_ROWS` | 2 | Rows of spots on the cup |
+| `LID_SPOTS` | 4 | Spots around the lid. They line up with the cup's columns when the counts match. |
+| `SPOT_ASPECT` | 4/3 | Height ÷ width. Use 16/9 for screenshot-shaped spots. |
+| `SPOT_GAP` | 4 | Minimum space between neighbouring spots, across and between rows |
+| `CUP_SPOT_MARGIN` | 5 | Space kept clear at the base of the cup and below the shoulder |
+| `LID_SPOT_MARGIN` | 3 | Space kept clear at the bottom and top of the lid's sloped face |
+| `SAME_SPOT_SIZE` | False | True shrinks the larger set of spots so the cup and lid take one sticker size |
+| `SPOT_START_ANGLE` | 45 | Angle of the first column. 270 centres a spot on the front. |
+
+The cup and lid spots are each sized automatically to the largest whole-millimetre size that
+fits, so adding spots makes them smaller and shrinking the gap or margins makes them bigger.
+The script prints the spot and sticker sizes when it runs. Set a count to 0 for no spots on
+that part.
+
+### Photoshop templates (Cricut Print Then Cut)
+
+[stickers/sticker_template.jsx](stickers/sticker_template.jsx) builds one Photoshop template
+per sticker size: `sticker_cup.psd` and `sticker_lid.psd`, at 300 DPI with no bleed or
+margins. Run it in Photoshop with **File > Scripts > Browse** and it saves them next to itself.
+When the sticker sizes change, put the sizes that `tip_cup.py` prints into `STICKERS` at the
+top of the script and run it again.
+
+The **Sticker** group in each template is masked to the rounded corners, so anything you put in
+it is trimmed to the sticker shape.
 
 1. Open the PSD. With the *Your design* layer selected, use **File > Place Embedded** so the
    artwork lands inside the group.
 2. **File > Export > Export As**, PNG with transparency on. Save one PNG per sticker.
 3. In Cricut Design Space, upload the PNG as a **Print Then Cut** image. The transparent
    corners become the cut line.
-4. On the canvas, lock the proportions and set the width to **38 mm (1.5 in)**, then print
-   and cut on sticker paper.
-
-To change the sticker size, edit the numbers at the top of
-[stickers/sticker_template.jsx](stickers/sticker_template.jsx) and run it in Photoshop with
-**File > Scripts > Browse**. It rebuilds the PSD next to itself.
+4. On the canvas, lock the proportions and set the width to the sticker width (**25 mm** for
+   the cup and **22 mm** for the lid with the default settings), then print and cut on sticker
+   paper.
 
 ## Threads
 
@@ -56,7 +85,7 @@ If the lid is too tight or loose on your printer, change `THREAD_AXIAL_GAP` (and
 ## Customising
 
 Every dimension is a parameter at the top of [tip_cup.py](tip_cup.py): cup height and taper,
-sticker spot size and positions, slot size and thread fit. Rebuild and re-render from the
+sticker spot counts, shape and spacing, slot size and thread fit. Rebuild and re-render from the
 repo root:
 
 ```bash
