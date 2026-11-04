@@ -28,7 +28,9 @@ Then run a model's script from the repo root, for example:
 ## Configurator
 
 To change a model's parameters in millimetres or inches without editing its script, use the
-[configurator](configurator/) app:
+[configurator](configurator/) app. Install it from the
+[latest release](https://github.com/SpeakingInBits/3d-models/releases/latest), and it keeps itself up
+to date. Or run it from source:
 
 ```bash
 .venv/Scripts/python configurator/app.py

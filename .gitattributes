@@ -2,3 +2,7 @@
 *.stl binary
 *.step binary
 *.png binary
+*.ico binary
+
+# Bash can't run scripts with Windows line endings
+*.sh text eol=lf
