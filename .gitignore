@@ -3,6 +3,9 @@
 __pycache__/
 *.pyc
 
+# Builds from the configurator
+custom-builds/
+
 # Secrets, if any are ever added
 .env
 
