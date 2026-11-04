@@ -18,11 +18,18 @@ from pathlib import Path
 
 import bd_warehouse.thread  # noqa: F401  loaded here so that jobs don't wait for it
 import build123d  # noqa: F401
-import pyvista as pv
+import numpy as np
+from PIL import Image, ImageDraw
 
 from models import ROOT
 
 MM_PER_INCH = 25.4
+PREVIEW_SIZE = (1000, 700)
+RENDER_SHARPNESS = 2  # drawn this many times larger and shrunk, for smooth edges
+VIEW = np.array((1, -1.6, 0.9))    # direction from the model to the camera
+LIGHT = np.array((0.3, -1.6, 1.4))
+MODEL_COLOUR = np.array((236, 228, 214))
+BACKGROUND = (185, 185, 189)
 READY = "@@ready"
 FINISHED = "@@finished"
 
@@ -54,25 +61,72 @@ def run_script(script, changes, out_dir):
     exec(compile(tree, str(script), "exec"), {"__name__": "__main__", "__file__": str(script)})
 
 
+def read_stl(path):
+    """The corners of each triangle in a binary STL, as an array of shape (triangles, 3, 3)."""
+    record = [("normal", "<f4", 3), ("corners", "<f4", (3, 3)), ("attribute", "<u2")]
+    return np.fromfile(path, dtype=record, offset=84)["corners"].astype(float)
+
+
+def split_long_triangles(triangles):
+    """Split long triangles into four, because each is drawn in order of its average depth."""
+    limit = np.ptp(triangles.reshape(-1, 3), axis=0).max() / 20
+    for _ in range(4):
+        edges = np.linalg.norm(triangles - np.roll(triangles, 1, axis=1), axis=2).max(axis=1)
+        long = edges > limit
+        a, b, c = (triangles[long, i] for i in range(3))
+        ab, bc, ca = (a + b) / 2, (b + c) / 2, (c + a) / 2
+        pieces = [(a, ab, ca), (ab, b, bc), (ca, bc, c), (ab, bc, ca)]
+        triangles = np.concatenate([triangles[~long]] + [np.stack(p, axis=1) for p in pieces])
+    return triangles
+
+
+def render(triangles, path):
+    """Draw a shaded picture of a mesh, nearest triangles last.
+
+    This runs on the CPU because the app has to work on computers without OpenGL, such as virtual
+    machines and remote desktops, where VTK crashes.
+    """
+    triangles = split_long_triangles(triangles)
+    towards_camera = VIEW / np.linalg.norm(VIEW)
+    right = np.cross((0, 0, 1), towards_camera)
+    right /= np.linalg.norm(right)
+    up = np.cross(towards_camera, right)
+
+    normals = np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0])
+    lengths = np.linalg.norm(normals, axis=1, keepdims=True)
+    normals = normals / np.where(lengths == 0, 1, lengths)
+    facing = normals @ towards_camera
+
+    x, y = triangles @ right, triangles @ up
+    width, height = (size * RENDER_SHARPNESS for size in PREVIEW_SIZE)
+    scale = 0.85 * min(width / np.ptp(x), height / np.ptp(y))
+    x = (x - (x.min() + x.max()) / 2) * scale + width / 2
+    y = height / 2 - (y - (y.min() + y.max()) / 2) * scale
+
+    light = normals @ (LIGHT / np.linalg.norm(LIGHT))
+    brightness = 0.35 + 0.65 * np.clip(light, 0, 1)
+    colours = (np.outer(brightness, MODEL_COLOUR)).astype(int)
+
+    image = Image.new("RGB", (width, height), BACKGROUND)
+    draw = ImageDraw.Draw(image)
+    depth = (triangles @ towards_camera).mean(axis=1)
+    for i in np.argsort(depth):
+        if facing[i] > 0:
+            colour = tuple(colours[i].tolist())
+            draw.polygon(list(zip(x[i].tolist(), y[i].tolist())), fill=colour, outline=colour)
+    image.resize(PREVIEW_SIZE, Image.LANCZOS).save(path)
+
+
 def report(out_dir):
     """Print the size of each part in both units and render the biggest one."""
-    meshes = [pv.read(stl) for stl in sorted(out_dir.glob("*.stl"))]
+    parts = {stl.name: read_stl(stl) for stl in sorted(out_dir.glob("*.stl"))}
     print("\nfinished parts:")
-    for stl, mesh in zip(sorted(out_dir.glob("*.stl")), meshes):
-        x0, x1, y0, y1, z0, z1 = mesh.bounds
-        size = (x1 - x0, y1 - y0, z1 - z0)
-        print(f"  {stl.name}: {' x '.join(f'{v:.1f}' for v in size)} mm "
+    for name, triangles in parts.items():
+        size = np.ptp(triangles.reshape(-1, 3), axis=0)
+        print(f"  {name}: {' x '.join(f'{v:.1f}' for v in size)} mm "
               f"({' x '.join(f'{v / MM_PER_INCH:.2f}' for v in size)} in)")
-
-    p = pv.Plotter(off_screen=True, window_size=(1000, 700))
-    p.set_background("#b9b9bd")
-    p.add_mesh(max(meshes, key=lambda mesh: mesh.volume), color="#ece4d6", smooth_shading=True,
-               split_sharp_edges=True, feature_angle=25, specular=0.25)
-    p.remove_all_lights()
-    p.add_light(pv.Light(light_type="headlight", intensity=0.85))
-    p.view_vector((1, -1.6, 0.9), viewup=(0, 0, 1))
-    p.screenshot(out_dir / "preview.png")
-    p.close()
+    biggest = max(parts.values(), key=lambda part: np.ptp(part.reshape(-1, 3), axis=0).prod())
+    render(biggest, out_dir / "preview.png")
 
 
 def forget_models():
@@ -99,17 +153,8 @@ def run_job(job):
         forget_models()
 
 
-def warm_up():
-    """Do a throwaway render, because the first one in a process takes about a second longer."""
-    p = pv.Plotter(off_screen=True, window_size=(100, 100))
-    p.add_mesh(pv.Sphere(), smooth_shading=True, split_sharp_edges=True)
-    p.screenshot()
-    p.close()
-
-
 def main():
     sys.stdout.reconfigure(line_buffering=True)  # so the app's log shows progress as it happens
-    warm_up()
     print(READY, flush=True)
     for line in sys.stdin:
         print(f"{FINISHED} {run_job(json.loads(line))}", flush=True)

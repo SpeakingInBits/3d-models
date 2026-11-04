@@ -190,7 +190,7 @@ class App:
         menu_bar = tk.Menu(self.root, tearoff=False)
         settings = tk.Menu(menu_bar, tearoff=False)
         settings.add_checkbutton(
-            label="Keep a spare worker (faster edits during a rebuild, about 450 MB more memory)",
+            label="Keep a spare worker (faster edits during a rebuild, about 350 MB more memory)",
             variable=self.use_spare, command=self.spare_setting_changed)
         menu_bar.add_cascade(label="Settings", menu=settings)
         self.root.configure(menu=menu_bar)

@@ -28,15 +28,18 @@ defaults** puts the current model back to the values in its script.
 
 ## Speed
 
-The app keeps a background worker running with the CAD libraries loaded, which uses about 500 MB of
-memory. The first rebuild after opening waits for it to load, which takes about 8 seconds. After
-that, the time is mostly the model's own geometry, roughly 2 seconds for the sticker stand, 4 for
-the phone stand, 8 for the tip cup and 14 for the barista cup.
+The app keeps a background worker running with the CAD libraries loaded, which uses about 450 MB of
+memory. The first rebuild after opening waits for it to load, which takes about 5 seconds. After
+that, the time is mostly the model's own geometry, roughly 2 seconds for the sticker stand, 3 for
+the phone stand, 6 for the tip cup and 11 for the barista cup.
+
+Previews are drawn on the CPU, so the app also works without OpenGL, such as on virtual machines
+and remote desktops.
 
 A change made during a rebuild waits for that rebuild to finish, then builds the latest values, and
 **Save build** is unavailable until then. To skip the wait, turn on **Settings > Keep a spare
 worker**. A second worker then stays loaded, so a change can replace the running rebuild at once,
-for about 450 MB more memory. The setting is remembered in `settings.json` in the saved builds
+for about 350 MB more memory. The setting is remembered in `settings.json` in the saved builds
 folder.
 
 Some parameters only make sense together, and not every combination builds. If a build fails, the
