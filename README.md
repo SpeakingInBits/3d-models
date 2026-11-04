@@ -24,3 +24,12 @@ Then run a model's script from the repo root, for example:
 ```bash
 .venv/Scripts/python tip-cup-jar/tip_cup.py
 ```
+
+## Configurator
+
+To change a model's parameters in millimetres or inches without editing its script, use the
+[configurator](configurator/) app:
+
+```bash
+.venv/Scripts/python configurator/app.py
+```
