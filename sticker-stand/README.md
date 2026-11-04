@@ -34,19 +34,26 @@ and follow the [Cricut steps](../tip-cup-jar/README.md#photoshop-templates-cricu
 
 ## Customising
 
-Every dimension is a parameter at the top of [sticker_stand.py](sticker_stand.py). The wall is
-sized around the spots, so the stand grows or shrinks to fit whatever you set here:
+Every dimension is a parameter at the top of [sticker_stand.py](sticker_stand.py). Set the size
+of the stand and how many spots you want, and the spots are sized to fill the wall:
 
 | Parameter | Default | What it does |
 |---|---|---|
+| `STAND_W` | 132 | Overall width |
+| `STAND_H` | 68 | Overall height, base included |
 | `SPOT_COLUMNS` | 4 | Spots across the wall, per side |
-| `SPOT_ROWS` | 1 | Rows of spots, per side. Use 2 columns and 2 rows for a narrower, taller stand. |
-| `SPOT_W`, `SPOT_H` | 27, 36 | Recess size. Stickers are 1 mm smaller all round. |
-| `SPOT_GAP` | 4 | Space between neighbouring spots |
+| `SPOT_ROWS` | 1 | Rows of spots, per side. Use 2 columns and 2 rows with a 70 × 108 mm stand for a narrower, taller one. |
+| `SPOT_ASPECT` | 4/3 | Height of a spot divided by its width |
+| `SPOT_GAP` | 4 | Minimum space between neighbouring spots |
 | `SPOT_MARGIN` | 6 | Space kept clear at the sides and top of the block of spots |
-| `SPOT_BOTTOM_MARGIN` | 20 | Plain wall between the base and the bottom of the spots. Raising it makes the stand taller. |
+| `SPOT_BOTTOM_MARGIN` | 20 | Minimum plain wall between the base and the bottom of the spots |
 | `BASE_D` | 50 | Depth of the base, front to back. Widen it if you make the stand much taller. |
 | `WALL_T` | 8 | Wall thickness. 5 mm remains between the front and back recesses. |
+
+Each spot is the largest that fits at `SPOT_ASPECT`, and the build prints its size. Stickers are
+1 mm smaller than the recess all round, so only the default size fits the tip cup's stickers. If
+the wall is wider or taller than the spots need, they spread out evenly to fill it. If it is too
+small for the count you asked for, the build stops with an error.
 
 Rebuild and re-render from the repo root:
 

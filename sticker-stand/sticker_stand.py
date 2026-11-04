@@ -19,17 +19,21 @@ from build123d import (
     fillet,
 )
 
-# ---------------------------------------------------------------- sticker spots
-# The default spot matches the tip cup's, so the same 25 x 34 mm stickers fit both. The wall is
-# sized around the spots, so changing anything here resizes the stand.
-SPOT_W, SPOT_H = 27.0, 36.0
+# ---------------------------------------------------------------- size and spot count
+# The three things to change. The spots are sized to fill the wall, so the defaults give the same
+# 27 x 36 mm spot as the tip cup and its 25 x 34 mm stickers fit. Other sizes need other stickers.
+STAND_W = 132.0        # overall width
+STAND_H = 68.0         # overall height, base included
 SPOT_COLUMNS = 4       # per side
 SPOT_ROWS = 1          # per side
+
+# ---------------------------------------------------------------- sticker spots
+SPOT_ASPECT = 4 / 3    # height / width: 4/3 is a phone photo held upright, 16/9 a screenshot
 SPOT_DEPTH = 1.5
 SPOT_CORNER_R = 4.0
-SPOT_GAP = 4.0         # space between neighbouring spots
+SPOT_GAP = 4.0         # minimum space between neighbouring spots
 SPOT_MARGIN = 6.0      # space kept clear at the sides and top of the block of spots
-SPOT_BOTTOM_MARGIN = 20.0  # plain wall between the base and the bottom of the spots
+SPOT_BOTTOM_MARGIN = 20.0  # minimum plain wall between the base and the bottom of the spots
 
 # ---------------------------------------------------------------- stand
 BASE_T = 6.0
@@ -42,21 +46,33 @@ EDGE_CHAMFER = 0.6     # bottom edge, so first-layer squish doesn't leave a lip
 
 OUT = Path(__file__).parent / "out"
 
-BLOCK_W = SPOT_COLUMNS * SPOT_W + (SPOT_COLUMNS - 1) * SPOT_GAP
-BLOCK_H = SPOT_ROWS * SPOT_H + (SPOT_ROWS - 1) * SPOT_GAP
-STAND_W = BLOCK_W + 2 * SPOT_MARGIN
-STAND_H = BASE_T + SPOT_BOTTOM_MARGIN + BLOCK_H + SPOT_MARGIN
+# the area of the wall the spots can use, and the largest spot that fits it
+AREA_W = STAND_W - 2 * SPOT_MARGIN
+AREA_H = STAND_H - BASE_T - SPOT_BOTTOM_MARGIN - SPOT_MARGIN
+SPOT_W = min((AREA_W - (SPOT_COLUMNS - 1) * SPOT_GAP) / SPOT_COLUMNS,
+             (AREA_H - (SPOT_ROWS - 1) * SPOT_GAP) / SPOT_ROWS / SPOT_ASPECT)
+SPOT_H = SPOT_W * SPOT_ASPECT
+
+
+def spread(count, spot, start, length):
+    """Centres of spots spread evenly along a line, with the outer two at its ends."""
+    if count == 1:
+        return [start + length / 2]
+    return [start + spot / 2 + i * (length - spot) / (count - 1) for i in range(count)]
 
 
 def spot_centres():
     """(x, z) of each spot; the back of the wall mirrors the front."""
-    x0 = (SPOT_W - BLOCK_W) / 2
-    z0 = BASE_T + SPOT_BOTTOM_MARGIN + SPOT_H / 2
-    return [(x0 + col * (SPOT_W + SPOT_GAP), z0 + row * (SPOT_H + SPOT_GAP))
-            for row in range(SPOT_ROWS) for col in range(SPOT_COLUMNS)]
+    xs = spread(SPOT_COLUMNS, SPOT_W, -AREA_W / 2, AREA_W)
+    zs = spread(SPOT_ROWS, SPOT_H, BASE_T + SPOT_BOTTOM_MARGIN, AREA_H)
+    return [(x, z) for z in zs for x in xs]
 
 
 def build_stand():
+    if SPOT_W <= 2 * SPOT_CORNER_R:
+        raise ValueError(f"{STAND_W:g} x {STAND_H:g} mm is too small for {SPOT_COLUMNS} x {SPOT_ROWS} "
+                         f"spots: they would be {SPOT_W:.1f} mm wide")
+
     base = extrude(RectangleRounded(STAND_W, BASE_D, BASE_CORNER_R), amount=BASE_T)
 
     wall = extrude(Plane.XZ * Pos(0, STAND_H / 2) * Rectangle(STAND_W, STAND_H),
@@ -81,8 +97,8 @@ def build_stand():
 
 def main():
     OUT.mkdir(exist_ok=True)
-    print(f"spots: {SPOT_COLUMNS} x {SPOT_ROWS} per side at {SPOT_W:g} x {SPOT_H:g} mm "
-          f"-> {SPOT_W - 2:g} x {SPOT_H - 2:g} mm stickers")
+    print(f"spots: {SPOT_COLUMNS} x {SPOT_ROWS} per side at {SPOT_W:.1f} x {SPOT_H:.1f} mm "
+          f"-> {SPOT_W - 2:.1f} x {SPOT_H - 2:.1f} mm stickers")
     print("building stand...")
     stand = build_stand()
     box = stand.bounding_box()

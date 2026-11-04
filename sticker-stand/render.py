@@ -4,10 +4,11 @@ from pathlib import Path
 
 import pyvista as pv
 
-from sticker_stand import STAND_H
+from sticker_stand import STAND_H, STAND_W
 
 OUT = Path(__file__).parent / "out"
 STAND = "#ece4d6"
+FIT = max(STAND_W / 132, STAND_H / 68)  # the cameras are set for a 132 x 68 mm stand
 
 
 def shot(mesh, path, camera, size=(1000, 700), zoom=1.0, side=1):
@@ -21,7 +22,7 @@ def shot(mesh, path, camera, size=(1000, 700), zoom=1.0, side=1):
     p.add_light(pv.Light(position=(400 * side, -200 * side, 100), focal_point=(0, 0, 25), intensity=0.35))
     p.add_light(pv.Light(light_type="headlight", intensity=0.25))
     p.camera_position = camera
-    p.camera.zoom(zoom)
+    p.camera.zoom(zoom / FIT)
     p.screenshot(path)
     p.close()
 
