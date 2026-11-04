@@ -6,6 +6,10 @@ __pycache__/
 # Builds from the configurator
 custom-builds/
 
+# Packaging output
+/build/
+/dist/
+
 # Secrets, if any are ever added
 .env
 

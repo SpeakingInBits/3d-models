@@ -18,13 +18,16 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
-from models import ROOT, Model, find_models
+from models import FROZEN, ROOT, Model, find_models
+from updates import Updater, run_install_hooks
 
 MM_PER_INCH = 25.4
-BUILDS = ROOT / "custom-builds"
+# updates replace the installed app's folder, so an installed copy keeps its files in Documents
+BUILDS = Path.home() / "Documents" / "3D Model Configurator" if FROZEN else ROOT / "custom-builds"
 PREVIEWS = BUILDS / ".preview"
 SETTINGS = BUILDS / "settings.json"
-BUILDER = Path(__file__).with_name("build_model.py")
+WORKER_COMMAND = ([str(Path(sys.executable).with_name("ModelWorker.exe"))] if FROZEN else
+                  [sys.executable, str(Path(__file__).with_name("build_model.py"))])
 READY, FINISHED = "@@ready", "@@finished"  # as in build_model.py, which is slow to import
 PREVIEW_DELAY_MS = 600   # how long typing has to pause before a rebuild starts
 UNITS = {"angle": "°", "ratio": "", "count": ""}
@@ -113,9 +116,9 @@ class Worker:
         self.ready = False
         self.stopped = False
         self.process = subprocess.Popen(
-            [sys.executable, "-u", str(BUILDER)], cwd=ROOT, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8",
-            errors="replace", creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            WORKER_COMMAND, cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         threading.Thread(target=self.read_output, args=(lines,), daemon=True).start()
 
     def read_output(self, lines):
@@ -160,8 +163,12 @@ class App:
         self.worker = Worker(self.lines)
         self.spare = None
         self.scale = root.winfo_fpixels("1i") / 96  # 2 on a display scaled to 200%
+        self.updater = Updater()
 
-        root.title("3D Model Configurator")
+        version = self.updater.version
+        root.title(f"3D Model Configurator {version}" if version else "3D Model Configurator")
+        if FROZEN:
+            root.iconbitmap(default=sys.executable)
         width = min(int(1360 * self.scale), root.winfo_screenwidth() - 40)
         height = min(int(800 * self.scale), root.winfo_screenheight() - 120)
         root.geometry(f"{width}x{height}+20+20")
@@ -175,6 +182,7 @@ class App:
         self.build_side_panel()
         self.model_list.selection_set(0)
         self.select_model()
+        self.updater.check_in_background()
         self.poll()
 
     # ------------------------------------------------------------ layout
@@ -244,6 +252,7 @@ class App:
         self.log = tk.Text(frame, width=62, height=12, state="disabled", wrap="word",
                            font=("Consolas", 9))
         self.log.grid(row=4, column=0, sticky="nsew")
+        self.update_button = ttk.Button(frame, command=self.install_update)  # shown once downloaded
 
     def scroll(self, event):
         if self.canvas.yview() != (0.0, 1.0):
@@ -425,7 +434,15 @@ class App:
                         self.write(line)
         except queue.Empty:
             pass
+        if self.updater.update and not self.update_button.winfo_ismapped():
+            self.update_button.configure(
+                text=f"Restart now to update to version {self.updater.new_version}")
+            self.update_button.grid(row=5, column=0, sticky="ew", pady=(8, 0))
         self.root.after(50, self.poll)
+
+    def install_update(self):
+        self.stop_workers()
+        self.updater.restart()
 
     def worker_ended(self, worker):
         """A worker that wasn't stopped crashed, which bad geometry can do to the CAD kernel."""
@@ -469,14 +486,19 @@ class App:
         self.log.see("end")
         self.log.configure(state="disabled")
 
-    def close(self):
+    def stop_workers(self):
         self.worker.stop()
         if self.spare:
             self.spare.stop()
+
+    def close(self):
+        self.stop_workers()
         self.root.destroy()
 
 
 def main():
+    if FROZEN:
+        run_install_hooks()
     try:
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)  # keeps text sharp on scaled displays

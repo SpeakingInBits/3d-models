@@ -20,7 +20,8 @@ import bd_warehouse.thread  # noqa: F401  loaded here so that jobs don't wait fo
 import build123d  # noqa: F401
 import pyvista as pv
 
-ROOT = Path(__file__).resolve().parent.parent
+from models import ROOT
+
 MM_PER_INCH = 25.4
 READY = "@@ready"
 FINISHED = "@@finished"
@@ -107,6 +108,7 @@ def warm_up():
 
 
 def main():
+    sys.stdout.reconfigure(line_buffering=True)  # so the app's log shows progress as it happens
     warm_up()
     print(READY, flush=True)
     for line in sys.stdin:

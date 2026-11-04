@@ -9,11 +9,13 @@ whatever the parameters are set to.
 import ast
 import io
 import re
+import sys
 import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+FROZEN = getattr(sys, "frozen", False)  # True in the installed app, which has the models bundled
+ROOT = Path(sys._MEIPASS) / "models" if FROZEN else Path(__file__).resolve().parent.parent
 WORDS = {"W": "width", "H": "height", "T": "thickness", "R": "radius", "L": "length", "D": "depth",
          "BB": "billboard", "QR": "QR"}
 DIAMETERS = {"MAGSAFE_D", "WATCH_D", "FOOT_D"}  # D means depth everywhere else
