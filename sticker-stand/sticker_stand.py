@@ -8,10 +8,12 @@ All dimensions are in millimetres. Change the parameters below and re-run from t
 Outputs go to sticker-stand/out:
     stand.stl           - print flat on its base, no supports
     sticker_stand.step  - the stand, for viewing/editing in other CAD tools
+    stickers.json       - sticker sizes for the configurator's sticker editor
 
 Axes: X runs left to right, Y from front to back, Z up.
 """
 
+import json
 from pathlib import Path
 
 from build123d import (
@@ -107,6 +109,9 @@ def main():
 
     export_stl(stand, OUT / "stand.stl", tolerance=0.01, angular_tolerance=0.1)
     export_step(stand, OUT / "sticker_stand.step")
+    sticker = {"name": "spot", "width": SPOT_W - 2, "height": SPOT_H - 2,
+               "corner": SPOT_CORNER_R - 1, "count": 2 * SPOT_COLUMNS * SPOT_ROWS}
+    (OUT / "stickers.json").write_text(json.dumps([sticker], indent=2) + "\n", encoding="utf-8")
     print("done ->", OUT)
 
 

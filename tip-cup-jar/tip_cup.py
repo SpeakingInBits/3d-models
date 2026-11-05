@@ -8,8 +8,10 @@ Outputs go to tip-cup-jar/out:
     cup.stl     - print upright, no supports
     lid.stl     - already flipped top-down for printing, no supports
     tip_cup_assembly.step - cup and lid assembled, for viewing/editing in other CAD tools
+    stickers.json - sticker sizes for the configurator's sticker editor
 """
 
+import json
 from math import cos, floor, pi, sin, radians, sqrt
 from pathlib import Path
 
@@ -149,6 +151,13 @@ def spot_sizes():
     return sizes
 
 
+def stickers():
+    """Each sticker's size. They're 1 mm smaller all round than their recess, for Cricut's cutting."""
+    counts = {"cup": CUP_SPOT_COLUMNS * CUP_SPOT_ROWS, "lid": LID_SPOTS}
+    return [{"name": part, "width": w - 2, "height": h - 2, "corner": SPOT_CORNER_R - 1,
+             "count": counts[part]} for part, (w, h) in spot_sizes().items()]
+
+
 def multi_start_thread(**kwargs):
     lead = THREAD_PITCH * THREAD_STARTS
     starts = [Thread(pitch=lead, **kwargs) for _ in range(THREAD_STARTS)]
@@ -267,6 +276,7 @@ def main():
 
     assembly = Compound(children=[cup, Pos(0, 0, CUP_H) * lid])
     export_step(assembly, OUT / "tip_cup_assembly.step")
+    (OUT / "stickers.json").write_text(json.dumps(stickers(), indent=2) + "\n", encoding="utf-8")
     print("done ->", OUT)
 
 

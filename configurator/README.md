@@ -20,11 +20,41 @@ and it keeps itself up to date. Or start it from the repo root:
    slicer.
 
 Each saved build goes in its own dated folder, along with a `parameters.json` listing what you
-changed. Installed copies save to `Documents\3D Model Configurator`, and copies run from source save
+changed and a Photoshop template for each sticker size. Installed copies save to `Documents\3D Model Configurator`, and copies run from source save
 to `custom-builds/`, which git ignores. The files in each model's `out` folder are not touched.
 
 Your edits stay in place when you switch between models, until you close the app. **Reset to
 defaults** puts the current model back to the values in its script.
+
+## Making stickers
+
+Models with sticker spots have a **Make stickers** button, which turns a photo into a sticker that
+fits. The sizes come from the build in the picture, so they follow your changes. The button is
+unavailable while that build is running or if it failed.
+
+1. Pick which sticker you're making, if the model has more than one size.
+2. Drop a photo on the window, or click **Open photo**. JPEG, PNG and iPhone HEIC photos all work.
+3. Drag the photo to move it. Scroll or use the **Size** slider to resize it, and use the
+   **Rotation** slider or **Rotate 90°** to turn it. The sticker is shown in full, with the rest of
+   the photo faded around it. **Fill sticker** and **Show whole photo** centre it again.
+4. Click **Export PNG**. Anywhere the photo doesn't cover stays white.
+
+The PNG is the exact sticker size at 300 DPI, with transparent corners. Upload it to Cricut Design
+Space as a **Print Then Cut** image and set its width to the size the app shows. Exports start in a
+`stickers` folder next to your saved builds. Repeat for each sticker you want.
+
+### Keeping the size of a printed model's stickers
+
+Sticker sizes change with a model's parameters, so keep a file for anything you print. Every saved
+build has a Photoshop template for each of its sticker sizes, such as `cup-25x34mm.psd`, next to its
+STL files. For a default model, which has no saved build, click **Export Photoshop template** in the
+sticker window. It works before you've added a photo.
+
+The size stays in three places: the file's name, the name of the group inside it, and the document
+itself, which opens at that size at 300 DPI. Exported PNGs have the size in their names too.
+
+Design inside the **Sticker** group, which is masked to the sticker's rounded corners, then export a
+PNG with transparency on and upload it to Cricut the same way.
 
 ## Speed
 
@@ -87,3 +117,7 @@ parameter, grouped by the `# ---- section` comments, with its end-of-line commen
 Numbers with a decimal point are treated as lengths in millimetres, and whole numbers as counts.
 Names containing `ANGLE`, `TILT` or `OVERHANG` are degrees. Write a length as `10.0`, not `10`, or
 it won't get an inch box.
+
+To get the **Make stickers** button, have `main()` write `stickers.json` to `OUT`, and commit the
+default model's copy. It's a list with an entry for each sticker size, with its `name`, `width`,
+`height` and `corner` radius in millimetres and the `count` needed.

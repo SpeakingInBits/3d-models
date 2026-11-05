@@ -10,9 +10,11 @@ Outputs go to barista-gift/out:
     cup.stl     - print upright, no supports
     lid.stl     - already flipped top-down for printing, no supports
     barista_gift_assembly.step - cup and lid assembled, for viewing/editing in other CAD tools
+    stickers.json - sticker sizes for the configurator's sticker editor
 """
 
 import argparse
+import json
 import sys
 from math import degrees, sqrt
 from pathlib import Path
@@ -175,6 +177,10 @@ def main():
 
     assembly = Compound(children=[cup, Pos(0, 0, base.CUP_H) * lid])
     export_step(assembly, OUT / "barista_gift_assembly.step")
+    qr_sticker = {"name": "QR code", "width": QR_RECESS - 2, "height": QR_RECESS - 2,
+                  "corner": QR_CORNER_R - 1, "count": 2}
+    (OUT / "stickers.json").write_text(json.dumps(base.stickers() + [qr_sticker], indent=2) + "\n",
+                                       encoding="utf-8")
     print("done ->", OUT)
 
 

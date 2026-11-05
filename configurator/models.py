@@ -58,6 +58,11 @@ class Model:
                 return path
         return None
 
+    @property
+    def stickers_file(self):
+        """The default model's sticker sizes. Only models with sticker spots write this."""
+        return self.script.parent / "out" / "stickers.json"
+
 
 def plain_value(node):
     """The value of a literal or sum like 4 / 3, or None if it depends on anything else."""

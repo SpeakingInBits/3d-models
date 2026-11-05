@@ -53,13 +53,29 @@ fits, so adding spots makes them smaller and shrinking the gap or margins makes 
 The script prints the spot and sticker sizes when it runs. Set a count to 0 for no spots on
 that part.
 
-### Photoshop templates (Cricut Print Then Cut)
+### Making the stickers (Cricut Print Then Cut)
 
-[stickers/sticker_template.jsx](stickers/sticker_template.jsx) builds one Photoshop template
-per sticker size: `sticker_cup.psd` and `sticker_lid.psd`, at 300 DPI with no bleed or
-margins. Run it in Photoshop with **File > Scripts > Browse** and it saves them next to itself.
-When the sticker sizes change, put the sizes that `tip_cup.py` prints into `STICKERS` at the
-top of the script and run it again.
+Click **Make stickers** in the [configurator](../configurator/README.md#making-stickers), drop in
+a photo, line it up and export a PNG. It's sized to match your build, so it follows any changes
+to the spots. Then for each PNG:
+
+1. In Cricut Design Space, upload the PNG as a **Print Then Cut** image. The transparent
+   corners become the cut line.
+2. On the canvas, lock the proportions and set the width to the sticker width (**25 mm** for
+   the cup and **22 mm** for the lid with the default settings), then print and cut on sticker
+   paper.
+
+### Photoshop templates
+
+For designs that need more than a photo, such as layers or text, use a Photoshop template at
+300 DPI with no bleed or margins. The configurator saves one for each sticker size with every
+build, and **Export Photoshop template** in its sticker window makes one for any model. See
+[keeping the size of a printed model's stickers](../configurator/README.md#keeping-the-size-of-a-printed-models-stickers).
+
+Without the app, [stickers/sticker_template.jsx](stickers/sticker_template.jsx) builds the same
+templates: `sticker_cup.psd` and `sticker_lid.psd`. Run it in Photoshop with **File > Scripts >
+Browse** and it saves them next to itself. When the sticker sizes change, put the sizes that
+`tip_cup.py` prints into `STICKERS` at the top of the script and run it again.
 
 The **Sticker** group in each template is masked to the rounded corners, so anything you put in
 it is trimmed to the sticker shape.
@@ -67,11 +83,7 @@ it is trimmed to the sticker shape.
 1. Open the PSD. With the *Your design* layer selected, use **File > Place Embedded** so the
    artwork lands inside the group.
 2. **File > Export > Export As**, PNG with transparency on. Save one PNG per sticker.
-3. In Cricut Design Space, upload the PNG as a **Print Then Cut** image. The transparent
-   corners become the cut line.
-4. On the canvas, lock the proportions and set the width to the sticker width (**25 mm** for
-   the cup and **22 mm** for the lid with the default settings), then print and cut on sticker
-   paper.
+3. Follow the [Cricut steps](#making-the-stickers-cricut-print-then-cut) above.
 
 ## Threads
 

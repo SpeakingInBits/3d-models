@@ -1,0 +1,16 @@
+[
+  {
+    "name": "cup",
+    "width": 25,
+    "height": 34,
+    "corner": 3.0,
+    "count": 8
+  },
+  {
+    "name": "lid",
+    "width": 22,
+    "height": 30,
+    "corner": 3.0,
+    "count": 4
+  }
+]

@@ -29,8 +29,8 @@ The eight spots are the same as the tip cup's, so the same stickers fit both.
 |---|---|---|
 | 4 in a row on each side | 27 × 36 mm, 1.5 mm deep, 4 mm corners | **25 × 34 mm**, 3 mm corners |
 
-Use `sticker_cup.psd` from the [tip cup's Photoshop template](../tip-cup-jar/stickers/sticker_template.jsx)
-and follow the [Cricut steps](../tip-cup-jar/README.md#photoshop-templates-cricut-print-then-cut).
+Make them with **Make stickers** in the [configurator](../configurator/README.md#making-stickers),
+then follow the tip cup's [Cricut steps](../tip-cup-jar/README.md#making-the-stickers-cricut-print-then-cut).
 
 ## Customising
 
