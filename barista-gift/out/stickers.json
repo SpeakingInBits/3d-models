@@ -1,0 +1,23 @@
+[
+  {
+    "name": "cup",
+    "width": 25,
+    "height": 34,
+    "corner": 3.0,
+    "count": 2
+  },
+  {
+    "name": "lid",
+    "width": 22,
+    "height": 30,
+    "corner": 3.0,
+    "count": 4
+  },
+  {
+    "name": "QR code",
+    "width": 36.0,
+    "height": 36.0,
+    "corner": 1.0,
+    "count": 2
+  }
+]

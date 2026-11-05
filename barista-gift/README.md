@@ -64,12 +64,13 @@ out. For contrasting letters, go over them with a paint pen after printing.
 | Cup back (2 photo spots) | 27 × 36 mm | 25 × 34 mm |
 | Lid (4 photo spots) | 24 × 32 mm | 22 × 30 mm |
 
-For the QR codes, save each payment app's QR code from its profile screen, print it at 36 mm on
-sticker paper and cut it out. Leave a white border around the code so phones can read it.
+Make them all with **Make stickers** in the
+[configurator](../configurator/README.md#making-stickers), then follow the tip cup's
+[Cricut steps](../tip-cup-jar/README.md#making-the-stickers-cricut-print-then-cut).
 
-The photo spots work the same as on the tip cup jar. Its
-[sticker templates](../tip-cup-jar/README.md#photoshop-templates-cricut-print-then-cut) are
-already the right sizes.
+For the QR codes, save each payment app's QR code from its profile screen and drop it in. Leave a
+white border around the code so phones can read it: click **Show whole photo**, then shrink it a
+little.
 
 ## Customising
 

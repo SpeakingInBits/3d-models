@@ -18,7 +18,10 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
+from tkinterdnd2 import TkinterDnD
+
 from models import FROZEN, ROOT, Model, find_models
+from stickers import StickerEditor, read_stickers, write_templates
 from updates import Updater, run_install_hooks
 
 MM_PER_INCH = 25.4
@@ -243,8 +246,10 @@ class App:
         self.reset_button = ttk.Button(buttons, text="Reset to defaults", command=self.reset)
         self.folder_button = ttk.Button(buttons, text="Open build folder", command=self.open_folder,
                                         state="disabled")
+        self.sticker_button = ttk.Button(buttons, text="Make stickers", command=self.open_stickers,
+                                         state="disabled")
         for column, button in enumerate((self.save_button, self.cancel_button, self.reset_button,
-                                         self.folder_button)):
+                                         self.folder_button, self.sticker_button)):
             button.grid(row=0, column=column, padx=(0, 6))
 
         self.progress = ttk.Progressbar(frame, mode="indeterminate")
@@ -300,12 +305,25 @@ class App:
         self.picture.configure(image=self.image or "", text="" if path else "No preview yet")
 
         title = "Your changes" if build else "Default model"
-        if self.job and self.job.model.key == key:
+        updating = self.job and self.job.model.key == key
+        if updating:
             title += " (updating...)"
         elif key in self.failed:
             title += " (latest changes didn't build)"
         self.picture_title.configure(text=title)
         self.folder_button.configure(state="normal" if key in self.latest else "disabled")
+        # the sizes aren't known while a build is running or after one has failed
+        can_make = self.stickers() and not updating and key not in self.failed
+        self.sticker_button.configure(state="normal" if can_make else "disabled")
+
+    def stickers(self):
+        """The sticker sizes of the build in the picture, or of the default model."""
+        build = self.shown.get(self.model.key)
+        return read_stickers(build / "stickers.json" if build else self.model.stickers_file)
+
+    def open_stickers(self):
+        StickerEditor(self.root, self.model, self.stickers(), BUILDS / "stickers" / self.model.key,
+                      self.scale)
 
     def reset(self):
         for field in self.forms[self.model.key][1]:
@@ -467,6 +485,7 @@ class App:
             if job.saving:
                 self.latest[key] = job.folder
                 self.write(f"\nSaved to {job.folder}\n")
+                self.save_templates(job.folder)
         else:
             self.failed.add(key)
             if job.saving:
@@ -474,6 +493,15 @@ class App:
             self.write("\nThe build did not finish. The last lines above say why.\n")
         self.refresh_side_panel()
         self.update_preview()
+
+    def save_templates(self, folder):
+        try:
+            names = write_templates(folder)
+        except OSError as error:
+            self.write(f"The Photoshop templates couldn't be saved: {error}\n")
+            return
+        if names:
+            self.write(f"Photoshop templates: {', '.join(names)}\n")
 
     def open_folder(self):
         os.startfile(self.latest[self.model.key])
@@ -504,7 +532,7 @@ def main():
         ctypes.windll.shcore.SetProcessDpiAwareness(1)  # keeps text sharp on scaled displays
     except (AttributeError, ImportError, OSError):
         pass
-    root = tk.Tk()
+    root = TkinterDnD.Tk()  # tk.Tk with drag and drop
     App(root)
     root.mainloop()
 

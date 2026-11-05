@@ -40,6 +40,8 @@ for model in MODELS:
                     (str(folder / "README.md"), f"models/{folder.name}")]
     if model.preview:
         model_files.append((str(model.preview), f"models/{folder.name}/out"))
+    if model.stickers_file.exists():
+        model_files.append((str(model.stickers_file), f"models/{folder.name}/out"))
 
 worker_datas, worker_binaries, worker_imports = [], [], list(model_imports)
 for package in ("build123d", "bd_warehouse", "lib3mf"):
@@ -48,7 +50,9 @@ for package in ("build123d", "bd_warehouse", "lib3mf"):
     worker_binaries += binaries
     worker_imports += imports
 
-app = Analysis([str(CONFIGURATOR / "app.py")], pathex=[str(CONFIGURATOR)], datas=model_files)
+dnd_datas, dnd_binaries, dnd_imports = collect_all("tkinterdnd2")
+app = Analysis([str(CONFIGURATOR / "app.py")], pathex=[str(CONFIGURATOR)],
+               datas=model_files + dnd_datas, binaries=dnd_binaries, hiddenimports=dnd_imports)
 worker = Analysis([str(CONFIGURATOR / "build_model.py")], pathex=[str(CONFIGURATOR)],
                   datas=worker_datas, binaries=worker_binaries, hiddenimports=worker_imports,
                   # jedi's deep folders can pass Windows' path length limit when installed
