@@ -55,11 +55,17 @@ LEG_L = 50.8           # leg's overall length outside the tank, top of the hook 
 LEG_CHAMFER = 1.0      # lead-in on the inside of the leg's tip
 HOOK_INSET = 20.0      # from each end of the basket to the middle of its hook
 
+# ---------------------------------------------------------------- glass standoff
+STANDOFF_T = 3.0       # flat plate at the bottom of the back wall that rests on the glass; 0 for none
+STANDOFF_W = 40.0      # its length along the wall, centred; anything over the basket's length runs full
+STANDOFF_PRESS = 0.0   # how far past the glass it reaches; raise it to push the bottom out harder
+
 OUT = Path(__file__).parent / "out"
 
 # ------------------------------------------------------------------- layout
 LENGTH = (OPENING - 2 * END_CLEAR - (COUNT - 1) * BETWEEN) / COUNT
 HOOK_XS = (-LENGTH / 2 + HOOK_INSET, LENGTH / 2 - HOOK_INSET)
+GLASS_Y = BACK_GAP + LIP_W   # the glass's inner face, flush with the frame's inner wall
 assert HOOK_XS[1] - HOOK_XS[0] >= HOOK_W + 20, "basket too short for two hooks"
 assert HOOK_ROOT >= GUSSET + 4 and RIM_ABOVE_LIP < HOOK_ROOT, "the hook's root is too short"
 assert LENGTH <= 250 and DEPTH + BACK_GAP + LIP_W + FRAME_TOP_W + 5 <= 210     and HEIGHT + LIP_DROP + 5 <= 220, "the basket won't fit on the MK4"
@@ -128,7 +134,22 @@ def build_basket():
     body = body.cut(*cutters)
     for x in HOOK_XS:
         body += build_hook(x)
+    if STANDOFF_T > 0:
+        body += build_standoff()
     return body
+
+
+def build_standoff():
+    """A flat plate at the bottom of the middle of the back wall, reaching out to the glass.
+
+    The hooks hold the top of the basket in from the glass by the lip and the gap, and the basket's weight swings its
+    bottom towards the glass. The plate's edge rests on the glass, so the basket hangs straight. It
+    sits on the build plate, so it prints without supports.
+    """
+    reach = GLASS_Y + STANDOFF_PRESS
+    half = min(STANDOFF_W, LENGTH) / 2
+    r = min(CORNER_R, reach / 2, half)
+    return rounded_box(-half, half, -WALL, reach, 0, STANDOFF_T, r)
 
 
 # ------------------------------------------------------------------- hooks

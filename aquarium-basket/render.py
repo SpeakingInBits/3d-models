@@ -27,15 +27,15 @@ def tank_end(lip_z):
     lip = pv.Box(bounds=(x0, x1, y, y + ab.LIP_W, lip_z - 4, lip_z))
     top = pv.Box(bounds=(x0 - ab.FRAME_TOP_W, x1 + ab.FRAME_TOP_W, y + ab.LIP_W,
                          y + ab.LIP_W + ab.FRAME_TOP_W, lip_z - 30, lip_z + ab.LIP_DROP))
-    glass = pv.Box(bounds=(x0, x1, y + ab.LIP_W + 4, y + ab.LIP_W + 10, lip_z - 220, lip_z - 30))
+    glass = pv.Box(bounds=(x0, x1, ab.GLASS_Y, ab.GLASS_Y + 6, lip_z - 220, lip_z - 30))
     sides = [pv.Box(bounds=(s * half, s * (half + ab.LIP_W), y - 140, y + ab.LIP_W, lip_z - 4, lip_z))
              for s in (-1, 1)]
     frame = lip + top + sides[0] + sides[1]
-    water = pv.Box(bounds=(x0, x1, y - 140, y + ab.LIP_W + 4, lip_z - 220, lip_z - 22))
+    water = pv.Box(bounds=(x0, x1, y - 140, ab.GLASS_Y, lip_z - 220, lip_z - 22))
     return [(frame, FRAME, 1.0), (glass, GLASS, 0.35), (water, WATER, 0.3)]
 
 
-def shot(meshes, path, camera, size=(1000, 800), zoom=1.0):
+def shot(meshes, path, camera, size=(1000, 800), zoom=1.0, parallel=False):
     p = pv.Plotter(off_screen=True, window_size=size)
     p.set_background("#b9b9bd")
     for m, color, opacity in meshes:
@@ -46,6 +46,8 @@ def shot(meshes, path, camera, size=(1000, 800), zoom=1.0):
     p.add_light(pv.Light(position=(400, -200, 100), focal_point=(0, 0, 0), intensity=0.35))
     p.add_light(pv.Light(light_type="headlight", intensity=0.3))
     p.camera_position = camera
+    if parallel:
+        p.enable_parallel_projection()
     p.camera.zoom(zoom)
     p.screenshot(path)
     p.close()
@@ -72,6 +74,14 @@ def main():
     cut = [(m.clip(normal="-x", origin=(hx, 0, 0)), color, 1.0) for m, color, _ in scene + tank[:1]]
     shot(cut, OUT / "preview_hook_section.png",
          [(hx - 300, 5, lip_z - 2), (hx, 5, lip_z - 2), (0, 0, 1)], size=(900, 600), zoom=2.6)
+
+    # the whole basket cut through its middle, hanging straight with the standoff on the glass
+    cx = (-(ab.COUNT - 1) / 2) * step
+    side = [(m.clip(normal="-x", origin=(cx, 0, 0)), color, 1.0)
+            for m, color, _ in scene + [tank[0], (tank[1][0], GLASS, 1.0)]]
+    mid = (cx, -40, lip_z / 2 - 20)
+    shot(side, OUT / "preview_side.png", [(hx - 600, *mid[1:]), mid, (0, 0, 1)],
+         size=(800, 900), zoom=1.1, parallel=True)
     print("rendered previews to", OUT)
 
 
