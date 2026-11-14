@@ -65,7 +65,7 @@ SADDLE_L = 15.0        # how far the hook's legs reach down either side of the b
 SADDLE_T = 2.5         # thickness of those legs
 SADDLE_CLEAR = 0.3     # total extra room for the basket wall between them
 LEG_T = 3.0            # leg down the outside of the frame
-LEG_L = 18.0           # how far it reaches down, below the frame's top edge
+LEG_L = 50.8           # leg's overall length outside the tank, top of the hook to its tip (2 in)
 LEG_CHAMFER = 1.0      # lead-in on the inside of the leg's tip
 HOOK_INSET = 12.0      # from each end of the basket's straight back wall to its hook
 
@@ -222,7 +222,7 @@ def hook_profile():
     pad_back = LIP_W - FRAME_CLEAR           # pad stops short of the frame's inner wall
     leg_in = LIP_W + FRAME_TOP_W + FRAME_CLEAR
     leg_out = leg_in + LEG_T
-    leg_bottom = arm_under - LEG_L
+    leg_bottom = arm_top - LEG_L
     top = rim + HOOK_T
     ramp = arm_top - top                     # 45 degree rise from the saddle up to the arm
     return [

@@ -45,9 +45,9 @@ front and back lips at the corners.
 
 The hooks are sized for this tank's frame. The lip is 8.5 mm below the top edge and 10 mm wide,
 and the frame top is 9/16 in (14.3 mm) across. A test print gripped better 1 mm narrower, so the
-hooks are made for 13.3 mm, and their legs reach 18 mm down the outside. They're the same shape as
-the [planter's](../aquarium-planter/) clip-on hook, so printing that hook first is a quick way to
-check the fit before printing the baskets.
+hooks are made for 13.3 mm. Each hook's leg down the outside of the tank is 2 in (50.8 mm) long
+overall. The hooks are the same shape as the [planter's](../aquarium-planter/) clip-on hook, so
+printing that hook first is a quick way to check the fit before printing the baskets.
 
 About 115 mm of each basket sits under water when the water is 25 mm below the lip.
 
@@ -64,6 +64,7 @@ you're most likely to change:
 | `GRID_OPENING`, `FLOOR_OPENING` | 8, 6 | Size of the square openings in the walls and floor. |
 | `OPENING` | 287 | The end wall's length between the lip edges. |
 | `FRAME_TOP_W`, `FRAME_CLEAR` | 13.3, 0.8 | Raise them if the hooks won't go over the frame. Lower them if the basket leans into the tank. |
+| `LEG_L` | 50.8 | Overall length of each hook's leg down the outside of the tank (2 in). |
 
 Rebuild and re-render from the repo root:
 

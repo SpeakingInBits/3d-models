@@ -51,7 +51,7 @@ BACK_GAP = 1.0         # basket's back wall to the lip edge
 HOOK_ROOT = 12.0       # how far down the back wall the hook is joined on; the wall is solid there
 GUSSET = 5.0           # thickening inside the back wall under each hook, so the wall doesn't bend
 LEG_T = 3.0            # leg down the outside of the frame
-LEG_L = 18.0           # how far it reaches down, below the frame's top edge
+LEG_L = 50.8           # leg's overall length outside the tank, top of the hook to its tip (2 in)
 LEG_CHAMFER = 1.0      # lead-in on the inside of the leg's tip
 HOOK_INSET = 20.0      # from each end of the basket to the middle of its hook
 
@@ -147,7 +147,7 @@ def hook_profile():
     pad_back = LIP_W - FRAME_CLEAR           # pad stops short of the frame's inner wall
     leg_in = LIP_W + FRAME_TOP_W + FRAME_CLEAR
     leg_out = leg_in + LEG_T
-    leg_bottom = arm_under - LEG_L
+    leg_bottom = arm_top - LEG_L
     top = rim + HOOK_T
     ramp = arm_top - top                     # 45 degree rise from the rim up to the arm
     return [

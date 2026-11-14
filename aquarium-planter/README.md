@@ -76,7 +76,7 @@ parts:
 | `LIP_DROP` | 8.5 | Top edge of the frame down to the lip. |
 | `LIP_W` | 10 | How far the lip sticks out from the frame's inner wall. |
 | `FRAME_TOP_W` | 13.3 | Across the top of the frame, from its inner wall above the lip to its outside face. It measures 9/16 in (14.3 mm); a test hook gripped better 1 mm narrower. Only the hooks use it. |
-| `LEG_L` | 18 | How far each hook's leg reaches down the outside of the frame, below its top edge. |
+| `LEG_L` | 50.8 | Overall length of each hook's leg down the outside of the tank, from the top of the hook to its tip (2 in). |
 
 If the hook won't go over the frame, raise `FRAME_TOP_W`. If the planter leans into the tank,
 the hook is too loose: lower `FRAME_TOP_W` or `FRAME_CLEAR`.
