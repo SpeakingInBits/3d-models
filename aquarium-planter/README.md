@@ -31,7 +31,7 @@ prints, and none needs slicer supports.
 |---|---|---|
 | [out/hook.stl](out/hook.stl) | 2 | Print one first and try it on the frame. It's small and quick, and it checks the lip and frame sizes. |
 | [out/planter.stl](out/planter.stl) | 1 per spot | 174 × 76 mm, 60 mm tall. Prints rim up. |
-| [out/tray_half.stl](out/tray_half.stl) | 2 | 205 × 157 mm, 15 mm thick. Both halves are the same part. Prints top face down. |
+| [out/tray_half.stl](out/tray_half.stl) | 2 | 205 × 152 mm, 15 mm thick. Both halves are the same part. Prints top face down. |
 | [out/tray_key.stl](out/tray_key.stl) | 3 | 14 × 50 × 7.5 mm keys that join the halves. |
 
 Printing notes:
@@ -47,7 +47,7 @@ STEP files for other CAD tools are in [out/aquarium_planter.step](out/aquarium_p
 
 ## The tray
 
-The tank is 287 mm front to back between the lip edges, so the tray is 314 mm long. That's too
+The tank is 287 mm front to back between the lip edges, so the tray is 304 mm long and rests 8.5 mm on each lip. That's too
 long for the MK4 bed, so it's two halves that meet in the middle. Three keys slide into pockets
 in both halves. They stop the joint folding under the planters' weight. Push the keys into one
 half, then push the other half on.
@@ -72,10 +72,10 @@ parts:
 
 | Parameter | Value | What to measure |
 |---|---|---|
-| `OPENING` | 287 | Front to back between the lip edges. The tray is this plus 13.5 mm on each end. |
+| `OPENING` | 287 | Front to back between the lip edges. The tray is this plus 8.5 mm on each end. |
 | `LIP_DROP` | 8.5 | Top edge of the frame down to the lip. |
-| `LIP_W` | 15 | How far the lip sticks out from the frame's inner wall. |
-| `FRAME_TOP_W` | 20 | **Estimated, please measure.** Across the top of the frame, from its inner wall (above the lip) to its outside face. Only the hooks use it. |
+| `LIP_W` | 10 | How far the lip sticks out from the frame's inner wall. |
+| `FRAME_TOP_W` | 14.3 | Across the top of the frame (9/16 in), from its inner wall above the lip to its outside face. Only the hooks use it. |
 
 If the hook won't go over the frame, raise `FRAME_TOP_W`. If the planter leans into the tank,
 the hook is too loose: lower `FRAME_TOP_W` or `FRAME_CLEAR`.
