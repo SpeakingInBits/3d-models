@@ -18,7 +18,8 @@ FROZEN = getattr(sys, "frozen", False)  # True in the installed app, which has t
 ROOT = Path(sys._MEIPASS) / "models" if FROZEN else Path(__file__).resolve().parent.parent
 WORDS = {"W": "width", "H": "height", "T": "thickness", "R": "radius", "L": "length", "D": "depth",
          "BB": "billboard", "QR": "QR"}
-DIAMETERS = {"MAGSAFE_D", "WATCH_D", "FOOT_D"}  # D means depth everywhere else
+DIAMETERS = {"MAGSAFE_D", "WATCH_D", "FOOT_D", "CUP_D", "CUP_BOTTOM_D", "CUP_HOLE_D",
+             "BASKET_HOLE_D"}  # D means depth everywhere else
 
 
 @dataclass
