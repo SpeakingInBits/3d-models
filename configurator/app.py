@@ -456,7 +456,18 @@ class App:
             self.update_button.configure(
                 text=f"Restart now to update to version {self.updater.new_version}")
             self.update_button.grid(row=5, column=0, sticky="ew", pady=(8, 0))
+            self.bring_to_front()
         self.root.after(50, self.poll)
+
+    def bring_to_front(self):
+        """Raises the window over the others, so the update button isn't hidden behind them."""
+        if self.root.state() == "iconic":
+            self.root.deiconify()
+        self.root.lift()
+        # Windows won't raise a window that isn't active above the others; staying on top for a
+        # moment gets around that without taking the keyboard from whatever the person is typing in.
+        self.root.attributes("-topmost", True)
+        self.root.after(200, self.root.attributes, "-topmost", False)
 
     def install_update(self):
         self.stop_workers()

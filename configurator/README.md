@@ -80,7 +80,8 @@ the sticker size in the log and each model's README.
 
 Installed copies update themselves from GitHub Releases with [Velopack](https://velopack.io/). When
 a new version is out, the app downloads it in the background and installs it the next time it
-opens, or right away with **Restart now**.
+opens, or right away with **Restart now**. The window comes to the front when that button appears,
+so it isn't missed behind other windows.
 
 To publish a version, open **Actions > Release > Run workflow** on `main` and choose what's in it,
 which picks the next version number. The workflow builds the package, checks that every model builds
