@@ -1,8 +1,9 @@
 # Aquarium Basket
 
 A grid-walled plant basket, like a dishwasher's cutlery basket, that hangs inside the tank against
-its end wall. It's 5.5 in (140 mm) tall and 3.5 in (89 mm) out from the wall. Its length is worked
-out so two of them fill the end wall side by side, with room to spare at the corners.
+its end wall. It's 5.5 in (140 mm) tall and 3.5 in (89 mm) out from the wall. Its width along the
+wall is worked out so two of them fill the end wall side by side, with room to spare at the corners,
+or you can set it yourself.
 
 Two hooks are built into the top of each basket's back wall, so there's nothing to come loose.
 Each sits on the frame's inner lip and wraps over the top of the frame, and the basket's rim ends up
@@ -70,7 +71,8 @@ you're most likely to change:
 | Parameter | Default | What it does |
 |---|---|---|
 | `HEIGHT`, `DEPTH` | 139.7, 88.9 | Basket height and how far it reaches out from the wall. |
-| `COUNT` | 2 | How many baskets share the wall. The length adjusts to fit. |
+| `WIDTH` | 0 | Width along the wall. 0 works it out from `COUNT` to fill the end wall. Anything else sets it, at least 80 mm so the hooks fit. |
+| `COUNT` | 2 | How many baskets share the wall, when `WIDTH` is 0. The width adjusts to fit. |
 | `END_CLEAR`, `BETWEEN` | 12, 8 | Room at the corners and between baskets. |
 | `GRID_OPENING`, `FLOOR_OPENING` | 8, 6 | Size of the square openings in the walls and floor. |
 | `OPENING` | 287 | The end wall's length between the lip edges. |

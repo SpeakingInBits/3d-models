@@ -30,7 +30,8 @@ FRAME_CLEAR = 0.8      # room around the frame in the hooks
 # ---------------------------------------------------------------- basket
 HEIGHT = 139.7         # 5.5 in, bottom to rim
 DEPTH = 88.9           # 3.5 in, out from the tank wall
-COUNT = 2              # baskets side by side along the end wall; their length is worked out to fit
+WIDTH = 0.0            # along the tank wall; 0 works it out so COUNT baskets fill the end wall
+COUNT = 2              # baskets side by side along the end wall, when WIDTH is 0
 END_CLEAR = 12.0       # room between the outer baskets and the front and back lips
 BETWEEN = 8.0          # room between neighbouring baskets; both are generous in case OPENING is off
 WALL = 2.0
@@ -63,12 +64,15 @@ STANDOFF_PRESS = 0.0   # how far past the glass it reaches; raise it to push the
 OUT = Path(__file__).parent / "out"
 
 # ------------------------------------------------------------------- layout
-LENGTH = (OPENING - 2 * END_CLEAR - (COUNT - 1) * BETWEEN) / COUNT
+FILL = (OPENING - 2 * END_CLEAR - (COUNT - 1) * BETWEEN) / COUNT   # width that fills the wall
+LENGTH = WIDTH if WIDTH > 0 else FILL                               # the basket's width along the wall
 HOOK_XS = (-LENGTH / 2 + HOOK_INSET, LENGTH / 2 - HOOK_INSET)
 GLASS_Y = BACK_GAP + LIP_W   # the glass's inner face, flush with the frame's inner wall
-assert HOOK_XS[1] - HOOK_XS[0] >= HOOK_W + 20, "basket too short for two hooks"
+assert HOOK_XS[1] - HOOK_XS[0] >= HOOK_W + 20, \
+    f"the basket is too narrow for two hooks: make it at least {2 * HOOK_INSET + HOOK_W + 20:.0f} mm wide"
 assert HOOK_ROOT >= GUSSET + 4 and RIM_ABOVE_LIP < HOOK_ROOT, "the hook's root is too short"
-assert LENGTH <= 250 and DEPTH + BACK_GAP + LIP_W + FRAME_TOP_W + 5 <= 210     and HEIGHT + LIP_DROP + 5 <= 220, "the basket won't fit on the MK4"
+assert LENGTH <= 250 and DEPTH + BACK_GAP + LIP_W + FRAME_TOP_W + 5 <= 210 \
+    and HEIGHT + LIP_DROP + 5 <= 220, "the basket won't fit on the MK4"
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -193,8 +197,11 @@ def main():
     bb = basket.bounding_box()
     print(f"basket: {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, "
           f"{basket.volume / 1000:.1f} cm3, solids={len(basket.solids())}, valid={basket.is_valid}")
-    print(f"{COUNT} baskets {LENGTH:.1f} mm long fill {OPENING:.0f} mm with {END_CLEAR:.0f} mm at "
-          f"each end and {BETWEEN:.0f} mm between")
+    if WIDTH > 0:
+        print(f"set to {LENGTH:.1f} mm wide; {COUNT} would fill the end wall at {FILL:.1f} mm each")
+    else:
+        print(f"{COUNT} baskets {LENGTH:.1f} mm wide fill {OPENING:.0f} mm with {END_CLEAR:.0f} mm at "
+              f"each end and {BETWEEN:.0f} mm between")
 
 
 if __name__ == "__main__":
