@@ -23,7 +23,7 @@ from build123d import (
 # ---------------------------------------------------------------- tank frame
 LIP_DROP = 8.5         # how far the lip is below the top edge of the frame
 LIP_W = 10.0           # how far the lip sticks into the tank from the frame's inner wall
-FRAME_TOP_W = 14.3     # across the top of the frame, inner wall to outer face (9/16 in)
+FRAME_TOP_W = 13.3     # across the frame top, inner wall to outer face: 9/16 in less 1 mm to grip
 OPENING = 287.0        # along the end wall, between the front and back lip edges
 FRAME_CLEAR = 0.8      # room around the frame in the hooks
 
@@ -51,7 +51,7 @@ BACK_GAP = 1.0         # basket's back wall to the lip edge
 HOOK_ROOT = 12.0       # how far down the back wall the hook is joined on; the wall is solid there
 GUSSET = 5.0           # thickening inside the back wall under each hook, so the wall doesn't bend
 LEG_T = 3.0            # leg down the outside of the frame
-LEG_L = 12.0           # how far it reaches down, below the frame's top edge
+LEG_L = 18.0           # how far it reaches down, below the frame's top edge
 LEG_CHAMFER = 1.0      # lead-in on the inside of the leg's tip
 HOOK_INSET = 20.0      # from each end of the basket to the middle of its hook
 
