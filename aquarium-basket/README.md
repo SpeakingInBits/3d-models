@@ -20,7 +20,7 @@ and neither needs slicer supports.
 | File | Print | Notes |
 |---|---|---|
 | [out/hook.stl](out/hook.stl) | 4 | Two per basket. The same file as the [planter's hook](../aquarium-planter/), so either works. |
-| [out/basket.stl](out/basket.stl) | 2 | 135.5 × 88.9 mm, 139.7 mm tall. Prints open top up. |
+| [out/basket.stl](out/basket.stl) | 2 | 127.5 × 88.9 mm, 139.7 mm tall. Prints open top up. |
 
 Printing notes:
 - The wall openings are about 8 mm square. Their tops are short flat bridges.
@@ -31,9 +31,10 @@ A STEP file for other CAD tools is in [out/aquarium_basket.step](out/aquarium_ba
 
 ## Fit
 
-The tank's end wall is 287 mm between the front and back lip edges. Two baskets of 135.5 mm leave
-6 mm at each end and 4 mm between them. They have to stay inside the lip edges, because the rim is
-level with the lips and would hit the front and back lips at the corners.
+The tank's end wall is 287 mm between the front and back lip edges. Two baskets of 127.5 mm leave
+12 mm at each end and 8 mm between them, so they still fit if that measurement is a little long.
+They have to stay inside the lip edges, because the rim is level with the lips and would hit the
+front and back lips at the corners.
 
 The hooks are sized for this tank's frame. The lip is 8.5 mm below the top edge and 10 mm wide,
 and the frame top is 14.3 mm (9/16 in) across. If you've already printed hooks for the planter,
@@ -50,7 +51,7 @@ you're most likely to change:
 |---|---|---|
 | `HEIGHT`, `DEPTH` | 139.7, 88.9 | Basket height and how far it reaches out from the wall. |
 | `COUNT` | 2 | How many baskets share the wall. The length adjusts to fit. |
-| `END_CLEAR`, `BETWEEN` | 6, 4 | Room at the corners and between baskets. |
+| `END_CLEAR`, `BETWEEN` | 12, 8 | Room at the corners and between baskets. |
 | `GRID_OPENING`, `FLOOR_OPENING` | 8, 6 | Size of the square openings in the walls and floor. |
 | `OPENING` | 287 | The end wall's length between the lip edges. |
 
