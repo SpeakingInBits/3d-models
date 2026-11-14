@@ -16,6 +16,7 @@ from mesh import Camera, Mesh, read_stl, render
 MM_PER_INCH = 25.4
 DEGREES_PER_PIXEL = 0.4
 ZOOM_STEP = 1.15         # per notch of the mouse wheel
+MOVING_SCALE = 0.5       # while the view moves, it's drawn this size and stretched to fit, for speed
 SHARPEN_DELAY_MS = 120   # after the view stops moving, it's redrawn larger and shrunk for smooth edges
 SHARPNESS = 2
 VIEWS = {               # yaw, pitch
@@ -69,7 +70,7 @@ class Viewer:
 
         self.canvas = tk.Canvas(self.window, highlightthickness=0, background="#b9b9bd")
         self.canvas.grid(row=1, column=0, sticky="nsew")
-        self.canvas.bind("<Configure>", lambda _: self.redraw())
+        self.canvas.bind("<Configure>", lambda _: self.redraw(moving=True))
         for button in (1, 2, 3):
             self.canvas.bind(f"<ButtonPress-{button}>", lambda e, b=button: self.start_drag(e, b))
             self.canvas.bind(f"<B{button}-Motion>", self.dragged)
@@ -116,24 +117,26 @@ class Viewer:
         self.redraw()
 
     # ------------------------------------------------------------ drawing
-    def redraw(self, sharp=False):
-        """Draw at screen size now, and again sharper once the view has stopped moving."""
+    def redraw(self, moving=False):
+        """Draw now, and again sharper once the view has stopped moving.
+
+        While it's being dragged or zoomed, it's drawn at half size, which is about three times
+        faster. Otherwise it's drawn at full size first, so jumps between views look sharp at once.
+        """
         if self.closed:
             return
         for pending in (self.redraw_pending, self.sharpen_pending):
             if pending:
                 self.window.after_cancel(pending)
-        self.redraw_pending = self.sharpen_pending = None
-        if not sharp:
-            # drawing waits for the window to be idle, so a fast drag skips frames instead of lagging
-            self.redraw_pending = self.window.after_idle(self.draw, 1)
+        # drawing waits for the window to be idle, so a fast drag skips frames instead of lagging
+        self.redraw_pending = self.window.after_idle(self.draw, MOVING_SCALE if moving else 1)
         self.sharpen_pending = self.window.after(SHARPEN_DELAY_MS, self.draw, SHARPNESS)
 
     def draw(self, sharpness):
-        if sharpness == 1:
-            self.redraw_pending = None
-        else:
+        if sharpness == SHARPNESS:
             self.sharpen_pending = None
+        else:
+            self.redraw_pending = None
         width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
         if width < 2 or height < 2:
             return
@@ -142,10 +145,10 @@ class Viewer:
             self.canvas.create_text(width / 2, height / 2, text="No parts to show",
                                     fill="#555555", font=("Segoe UI", 11))
             return
-        pixels = render(self.mesh, self.camera, width * sharpness, height * sharpness)
+        pixels = render(self.mesh, self.camera, round(width * sharpness), round(height * sharpness))
         image = Image.fromarray(pixels)
-        if sharpness > 1:
-            image = image.resize((width, height), Image.LANCZOS)
+        if sharpness != 1:
+            image = image.resize((width, height), Image.LANCZOS if sharpness > 1 else Image.BILINEAR)
         self.photo = ImageTk.PhotoImage(image)
         self.canvas.create_image(0, 0, image=self.photo, anchor="nw")
 
@@ -170,7 +173,7 @@ class Viewer:
             scale = self.camera.pixels_per_mm(self.mesh, *self.canvas_size())
             self.camera.pan_x += dx / scale
             self.camera.pan_y -= dy / scale
-        self.redraw()
+        self.redraw(moving=True)
 
     def end_drag(self, _event):
         self.drag = None
@@ -186,7 +189,7 @@ class Viewer:
         across, up = event.x - width / 2, height / 2 - event.y
         self.camera.pan_x += across / after - across / before
         self.camera.pan_y += up / after - up / before
-        self.redraw()
+        self.redraw(moving=True)
 
     def canvas_size(self):
         return self.canvas.winfo_width(), self.canvas.winfo_height()
