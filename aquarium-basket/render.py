@@ -75,10 +75,12 @@ def main():
     shot(cut, OUT / "preview_hook_section.png",
          [(hx - 300, 5, lip_z - 2), (hx, 5, lip_z - 2), (0, 0, 1)], size=(900, 600), zoom=2.6)
 
-    # the whole basket cut through a hook, hanging straight with the standoff on the glass
-    glass = [(tank[1][0].clip(normal="-x", origin=(hx, 0, 0)), GLASS, 1.0)]
-    mid = (hx, -40, lip_z / 2 - 20)
-    shot(cut + glass, OUT / "preview_side.png", [(hx - 600, *mid[1:]), mid, (0, 0, 1)],
+    # the whole basket cut through its middle, hanging straight with the standoff on the glass
+    cx = (-(ab.COUNT - 1) / 2) * step
+    side = [(m.clip(normal="-x", origin=(cx, 0, 0)), color, 1.0)
+            for m, color, _ in scene + [tank[0], (tank[1][0], GLASS, 1.0)]]
+    mid = (cx, -40, lip_z / 2 - 20)
+    shot(side, OUT / "preview_side.png", [(hx - 600, *mid[1:]), mid, (0, 0, 1)],
          size=(800, 900), zoom=1.1, parallel=True)
     print("rendered previews to", OUT)
 

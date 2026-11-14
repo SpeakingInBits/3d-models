@@ -8,10 +8,10 @@ Two hooks are built into the top of each basket's back wall, so there's nothing 
 Each sits on the frame's inner lip and wraps over the top of the frame, and the basket's rim ends up
 level with the lip.
 
-A flat plate along the bottom of the back wall reaches out to the glass. The hooks hold the top of
-the basket 11 mm in from the glass (the 10 mm lip plus a 1 mm gap), and without the plate the
-basket's weight swings its bottom in towards the glass. The plate's edge rests on the glass, so the
-basket hangs straight.
+A short flat plate at the bottom of the back wall, in the middle, reaches out to the glass. The
+hooks hold the top of the basket 11 mm in from the glass (the 10 mm lip plus a 1 mm gap), and
+without the plate the basket's weight swings its bottom in towards the glass. The plate's edge rests
+on the glass, so the basket hangs straight.
 
 | Basket | Two on the end wall | Back, with the hooks |
 |---|---|---|
@@ -38,7 +38,7 @@ behind the basket. Snap them off after printing.
 Everything else prints without supports:
 - The wall openings are about 8 mm square, and their tops are short flat bridges.
 - The floor has 6 mm openings, small enough to hold gravel or clay pebbles.
-- The plate on the back sits on the build plate, level with the floor.
+- The plate on the back lies on the build plate, level with the floor.
 - Inside the back wall, a gusset under each hook stiffens the joint. Its underside slopes at 45°.
 - Solid bands run around the rim, the bottom and either side of each corner for stiffness.
 
@@ -77,6 +77,7 @@ you're most likely to change:
 | `FRAME_TOP_W`, `FRAME_CLEAR` | 13.3, 0.8 | Raise them if the hooks won't go over the frame. Lower them if the basket leans into the tank. |
 | `LEG_L` | 50.8 | Overall length of each hook's leg down the outside of the tank (2 in). |
 | `STANDOFF_T` | 3 | Thickness of the plate that rests on the glass. 0 leaves it off. |
+| `STANDOFF_W` | 40 | Its length along the wall, centred. Set it longer than the basket (say 200) to run it the full length. |
 | `STANDOFF_PRESS` | 0 | How far past the glass the plate reaches. Raise it to push the bottom out harder. |
 
 Rebuild and re-render from the repo root:

@@ -56,7 +56,8 @@ LEG_CHAMFER = 1.0      # lead-in on the inside of the leg's tip
 HOOK_INSET = 20.0      # from each end of the basket to the middle of its hook
 
 # ---------------------------------------------------------------- glass standoff
-STANDOFF_T = 3.0       # flat plate along the bottom of the back wall that rests on the glass; 0 for none
+STANDOFF_T = 3.0       # flat plate at the bottom of the back wall that rests on the glass; 0 for none
+STANDOFF_W = 40.0      # its length along the wall, centred; anything over the basket's length runs full
 STANDOFF_PRESS = 0.0   # how far past the glass it reaches; raise it to push the bottom out harder
 
 OUT = Path(__file__).parent / "out"
@@ -139,14 +140,16 @@ def build_basket():
 
 
 def build_standoff():
-    """A flat plate along the bottom of the back wall, reaching out to the glass.
+    """A flat plate at the bottom of the middle of the back wall, reaching out to the glass.
 
     The hooks hold the top of the basket in from the glass by the lip and the gap, and the basket's weight swings its
     bottom towards the glass. The plate's edge rests on the glass, so the basket hangs straight. It
     sits on the build plate, so it prints without supports.
     """
     reach = GLASS_Y + STANDOFF_PRESS
-    return rounded_box(-LENGTH / 2, LENGTH / 2, -WALL, reach, 0, STANDOFF_T, min(CORNER_R, reach / 2))
+    half = min(STANDOFF_W, LENGTH) / 2
+    r = min(CORNER_R, reach / 2, half)
+    return rounded_box(-half, half, -WALL, reach, 0, STANDOFF_T, r)
 
 
 # ------------------------------------------------------------------- hooks
