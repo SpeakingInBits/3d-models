@@ -9,7 +9,7 @@ from build123d import Pos, export_stl
 import aquarium_basket as ab
 
 OUT = Path(__file__).parent / "out"
-PLASTIC, HOOK, FRAME, GLASS, WATER = "#ecebe6", "#f2c14e", "#2b2d31", "#a9d4e0", "#4f8fb8"
+PLASTIC, FRAME, GLASS, WATER = "#ecebe6", "#2b2d31", "#a9d4e0", "#4f8fb8"
 
 
 def mesh(part):
@@ -58,16 +58,20 @@ def main():
     shot(one, OUT / "preview_angle.png", [(-220, -330, 330), c, (0, 0, 1)])
     shot(one, OUT / "preview_back.png", [(200, 320, 260), c, (0, 0, 1)])
 
-    # two baskets side by side along the end wall, each on its pair of hooks
+    # two baskets side by side along the end wall
     step = ab.LENGTH + ab.BETWEEN
-    scene = []
-    for i in range(ab.COUNT):
-        x = (i - (ab.COUNT - 1) / 2) * step
-        scene.append((mesh(Pos(x, 0, 0) * basket), PLASTIC, 1.0))
-        scene += [(mesh(ab.build_hook(x + hx)), HOOK, 1.0) for hx in ab.HOOK_XS]
+    scene = [(mesh(Pos((i - (ab.COUNT - 1) / 2) * step, 0, 0) * basket), PLASTIC, 1.0)
+             for i in range(ab.COUNT)]
     lip_z = ab.HEIGHT - ab.RIM_ABOVE_LIP
-    shot(scene + tank_end(lip_z), OUT / "preview_in_tank.png",
+    tank = tank_end(lip_z)
+    shot(scene + tank, OUT / "preview_in_tank.png",
          [(-260, -520, 330), (0, -40, 80), (0, 0, 1)], size=(1100, 850))
+
+    # cut through a hook to show how it grips the frame
+    hx = (-(ab.COUNT - 1) / 2) * step + ab.HOOK_XS[0]
+    cut = [(m.clip(normal="-x", origin=(hx, 0, 0)), color, 1.0) for m, color, _ in scene + tank[:1]]
+    shot(cut, OUT / "preview_hook_section.png",
+         [(hx - 300, 5, lip_z - 2), (hx, 5, lip_z - 2), (0, 0, 1)], size=(900, 600), zoom=2.6)
     print("rendered previews to", OUT)
 
 

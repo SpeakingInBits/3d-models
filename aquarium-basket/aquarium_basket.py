@@ -1,13 +1,13 @@
 """Aquarium plant basket: a grid-walled box, like a dishwasher's cutlery basket, that hangs inside a
-framed tank against its end wall from two clip-on hooks. Two of them fill the end wall side by side.
+framed tank against its end wall from two hooks built into its back wall. Two of them fill the end
+wall side by side.
 
 All dimensions are in millimetres. Change the parameters below and re-run from the repo root:
 
     .venv/Scripts/python aquarium-basket/aquarium_basket.py
 
-Outputs go to aquarium-basket/out, each laid out the way it prints (no slicer supports):
-    basket.stl   - print 2, open top up
-    hook.stl     - print 4 (two per basket), lying flat on its side; the same as the planter's hook
+Outputs go to aquarium-basket/out:
+    basket.stl   - print 2, open top up, with supports from the build plate under the two hooks
     aquarium_basket.step - the basket, for viewing/editing in other CAD tools
 
 Axes: X runs along the tank wall, Y points out through the tank wall, Z up. The basket is built with
@@ -17,7 +17,7 @@ its back wall's outside face at Y = 0 and its rim at Z = HEIGHT.
 from pathlib import Path
 
 from build123d import (
-    Polyline, Pos, RectangleRounded, Rot, Solid, Vector, export_step, export_stl, extrude, make_face,
+    Polyline, Pos, RectangleRounded, Solid, Vector, export_step, export_stl, extrude, make_face,
 )
 
 # ---------------------------------------------------------------- tank frame
@@ -47,10 +47,9 @@ CORNER_BAND = 6.0      # solid strip either side of each corner
 HOOK_W = 20.0          # along the tank wall
 HOOK_T = 3.0           # thickness of the hook's top and its riser
 RIM_ABOVE_LIP = 0.0    # basket rim height above the lip
-BACK_GAP = 3.5         # basket's back wall to the lip edge; room for the hook's outer leg
-SADDLE_L = 15.0        # how far the hook's legs reach down either side of the basket's back wall
-SADDLE_T = 2.5         # thickness of those legs
-SADDLE_CLEAR = 0.3     # total extra room for the basket wall between them
+BACK_GAP = 1.0         # basket's back wall to the lip edge
+HOOK_ROOT = 12.0       # how far down the back wall the hook is joined on; the wall is solid there
+GUSSET = 5.0           # thickening inside the back wall under each hook, so the wall doesn't bend
 LEG_T = 3.0            # leg down the outside of the frame
 LEG_L = 12.0           # how far it reaches down, below the frame's top edge
 LEG_CHAMFER = 1.0      # lead-in on the inside of the leg's tip
@@ -62,9 +61,8 @@ OUT = Path(__file__).parent / "out"
 LENGTH = (OPENING - 2 * END_CLEAR - (COUNT - 1) * BETWEEN) / COUNT
 HOOK_XS = (-LENGTH / 2 + HOOK_INSET, LENGTH / 2 - HOOK_INSET)
 assert HOOK_XS[1] - HOOK_XS[0] >= HOOK_W + 20, "basket too short for two hooks"
-assert BACK_GAP >= SADDLE_T + SADDLE_CLEAR / 2 + 0.5, "no room for the hook's outer leg"
-assert TOP_BAND < SADDLE_L, "the top band is shorter than the hook's legs"
-assert LENGTH <= 250 and DEPTH <= 210 and HEIGHT <= 220, "the basket won't fit on the MK4"
+assert HOOK_ROOT >= GUSSET + 4 and RIM_ABOVE_LIP < HOOK_ROOT, "the hook's root is too short"
+assert LENGTH <= 250 and DEPTH + BACK_GAP + LIP_W + FRAME_TOP_W + 5 <= 210     and HEIGHT + LIP_DROP + 5 <= 220, "the basket won't fit on the MK4"
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -105,7 +103,7 @@ def build_basket():
     edge = CORNER_R + CORNER_BAND
     cols_x, col_w = spread(x0 + edge, x1 - edge, GRID_OPENING, GRID_BAR)
     cols_y, col_d = spread(y0 + edge, y1 - edge, GRID_OPENING, GRID_BAR)
-    saddle_bottom = HEIGHT - SADDLE_L - 2
+    root_bottom = HEIGHT - HOOK_ROOT - 2
 
     cutters = []
     for z in rows:
@@ -114,7 +112,7 @@ def build_basket():
             a, b = x - col_w / 2, x + col_w / 2
             cutters.append(box(a, b, y0 - 1, y0 + WALL + 1, z_lo, z_hi))           # front
             under_hook = any(abs(x - hx) < HOOK_W / 2 + col_w / 2 + 1 for hx in HOOK_XS)
-            if not (under_hook and z_hi > saddle_bottom):                            # back
+            if not (under_hook and z_hi > root_bottom):                              # back
                 cutters.append(box(a, b, y1 - WALL - 1, y1 + 1, z_lo, z_hi))
         for y in cols_y:
             a, b = y - col_d / 2, y + col_d / 2
@@ -127,20 +125,23 @@ def build_basket():
     for x in fx:
         for y in fy:
             cutters.append(box(x - fw / 2, x + fw / 2, y - fd / 2, y + fd / 2, -1, FLOOR + 1))
-    return body.cut(*cutters)
+    body = body.cut(*cutters)
+    for x in HOOK_XS:
+        body += build_hook(x)
+    return body
 
 
 # ------------------------------------------------------------------- hooks
 def hook_profile():
     """(y, z) outline of a hook, with the lip's edge at y = 0 and the lip's top at z = 0.
 
-    A saddle drops over the basket's back wall, a pad sits on the lip, and an arm reaches over the
-    top of the frame to a leg down its outside face. The leg stops the basket swinging in.
+    It grows out of the top of the basket's back wall, with a gusset inside the wall. A pad sits on
+    the lip, and an arm reaches over the top of the frame to a leg down its outside face. The frame
+    is gripped between the pad and the leg, which stops the basket tipping into the tank.
     """
     rim = RIM_ABOVE_LIP
     wall_out = -BACK_GAP
     wall_in = wall_out - WALL
-    c = SADDLE_CLEAR / 2
     arm_under = LIP_DROP + FRAME_CLEAR
     arm_top = arm_under + HOOK_T
     pad_back = LIP_W - FRAME_CLEAR           # pad stops short of the frame's inner wall
@@ -148,27 +149,19 @@ def hook_profile():
     leg_out = leg_in + LEG_T
     leg_bottom = arm_under - LEG_L
     top = rim + HOOK_T
-    ramp = arm_top - top                     # 45 degree rise from the saddle up to the arm
+    ramp = arm_top - top                     # 45 degree rise from the rim up to the arm
     return [
-        (wall_in - c - SADDLE_T, rim - SADDLE_L), (wall_in - c - SADDLE_T, top),
-        (0.0, top), (ramp, arm_top), (leg_out, arm_top), (leg_out, leg_bottom),
-        (leg_in + LEG_CHAMFER, leg_bottom), (leg_in, leg_bottom + LEG_CHAMFER), (leg_in, arm_under),
-        (pad_back, arm_under), (pad_back, 0.0), (wall_out + c + SADDLE_T, 0.0),
-        (wall_out + c + SADDLE_T, rim - SADDLE_L), (wall_out + c, rim - SADDLE_L),
-        (wall_out + c, rim), (wall_in - c, rim), (wall_in - c, rim - SADDLE_L),
+        (wall_in - GUSSET, top), (0.0, top), (ramp, arm_top), (leg_out, arm_top),
+        (leg_out, leg_bottom), (leg_in + LEG_CHAMFER, leg_bottom),
+        (leg_in, leg_bottom + LEG_CHAMFER), (leg_in, arm_under), (pad_back, arm_under),
+        (pad_back, 0.0), (wall_out, 0.0), (wall_out, rim - HOOK_ROOT), (wall_in, rim - HOOK_ROOT),
+        (wall_in, rim - 3 - GUSSET), (wall_in - GUSSET, rim - 3),   # 45 degrees under the gusset
     ]
 
 
 def build_hook(x=0.0):
-    """A hook in the basket's coordinates, hanging on its back wall at x."""
+    """A hook in the basket's coordinates, on its back wall at x."""
     return Pos(0, BACK_GAP, HEIGHT - RIM_ABOVE_LIP) * prism_x(hook_profile(), x, HOOK_W)
-
-
-def lay_flat(part):
-    """Turn a part built along X onto its side and set it on the bed."""
-    part = Rot(0, -90, 0) * part
-    bb = part.bounding_box()
-    return Pos(-bb.center().X, -bb.center().Y, -bb.min.Z) * part
 
 
 def main():
@@ -176,7 +169,6 @@ def main():
     basket = build_basket()
     export_stl(basket, OUT / "basket.stl")
     export_step(basket, OUT / "aquarium_basket.step")
-    export_stl(lay_flat(prism_x(hook_profile(), 0, HOOK_W)), OUT / "hook.stl")
     bb = basket.bounding_box()
     print(f"basket: {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, "
           f"{basket.volume / 1000:.1f} cm3, solids={len(basket.solids())}, valid={basket.is_valid}")

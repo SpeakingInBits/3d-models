@@ -6,7 +6,7 @@ Each model lives in its own folder with its source script, ready-to-print STLs a
 | Model | Description |
 |---|---|
 | [aquarium-planter](aquarium-planter/) | Planter with a perforated feeding cup and a slotted plant basket, on hooks or in a two-piece tray that rests on a framed tank's inner lip |
-| [aquarium-basket](aquarium-basket/) | Grid-walled plant basket, like a dishwasher cutlery basket, that hangs in pairs along a framed tank's end wall |
+| [aquarium-basket](aquarium-basket/) | Grid-walled plant basket, like a dishwasher cutlery basket, with built-in hooks; two hang side by side along a framed tank's end wall |
 | [tip-cup-jar](tip-cup-jar/) | Coffee-cup tip jar with a screw-on coin-slot lid and recessed sticker spots |
 | [barista-gift](barista-gift/) | Birthday tip cup for a barista with their name and two QR code billboards |
 | [phone-stand](phone-stand/) | Charging stand for an iPhone 14 Pro Max on MagSafe with an Apple Watch charger pad |
