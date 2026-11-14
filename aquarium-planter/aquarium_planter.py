@@ -27,8 +27,8 @@ from build123d import (
 
 # ---------------------------------------------------------------- tank frame
 LIP_DROP = 8.5         # how far the lip is below the top edge of the frame
-LIP_W = 15.0           # how far the lip sticks into the tank from the frame's inner wall
-FRAME_TOP_W = 20.0     # across the top of the frame, inner wall to outer face; measure yours
+LIP_W = 10.0           # how far the lip sticks into the tank from the frame's inner wall
+FRAME_TOP_W = 14.3     # across the top of the frame, inner wall to outer face (9/16 in)
 OPENING = 287.0        # between the front and back lip edges
 FRAME_CLEAR = 0.8      # room around the frame in the hooks
 
