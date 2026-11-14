@@ -16,7 +16,9 @@ and it keeps itself up to date. Or start it from the repo root:
    updates the other.
 3. Pause for a moment and the model rebuilds by itself. The log shows the finished size of each
    part in both units, and the picture changes to match.
-4. Click **Save build** when you're happy, then **Open build folder** to get the STL files for your
+4. Click **View in 3D** to check the parts from every side. See
+   [Looking at it in 3D](#looking-at-it-in-3d).
+5. Click **Save build** when you're happy, then **Open build folder** to get the STL files for your
    slicer.
 
 Each saved build goes in its own dated folder, along with a `parameters.json` listing what you
@@ -25,6 +27,21 @@ to `custom-builds/`, which git ignores. The files in each model's `out` folder a
 
 Your edits stay in place when you switch between models, until you close the app. **Reset to
 defaults** puts the current model back to the values in its script.
+
+## Looking at it in 3D
+
+**View in 3D** opens a window with the model's parts, to turn around and look at from any side.
+
+- Drag to turn the part. Drag with the right or middle mouse button to move it, and scroll to zoom
+  in on the spot under the mouse.
+- The buttons jump to a straight view from the front, back, either side, the top or the bottom.
+  **Angle**, or a double-click, goes back to the starting view.
+- Pick a part from the list when a model has more than one. Its finished size is shown in both
+  units.
+
+The window follows the main one. Pick another model and it shows that one. After a rebuild it shows
+the new parts without moving the view, so you can watch the spot you're changing. The button is
+unavailable while a build is running.
 
 ## Making stickers
 
@@ -63,7 +80,7 @@ memory. The first rebuild after opening waits for it to load, which takes about 
 that, the time is mostly the model's own geometry, roughly 2 seconds for the sticker stand, 3 for
 the phone stand, 6 for the tip cup and 11 for the barista cup.
 
-Previews are drawn on the CPU, so the app also works without OpenGL, such as on virtual machines
+Previews and the 3D view are drawn on the CPU, so the app also works without OpenGL, such as on virtual machines
 and remote desktops.
 
 A change made during a rebuild waits for that rebuild to finish, then builds the latest values, and

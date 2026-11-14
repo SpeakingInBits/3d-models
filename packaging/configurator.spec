@@ -40,6 +40,8 @@ for model in MODELS:
                     (str(folder / "README.md"), f"models/{folder.name}")]
     if model.preview:
         model_files.append((str(model.preview), f"models/{folder.name}/out"))
+    # the default model's parts, for the 3D view
+    model_files += [(str(stl), f"models/{folder.name}/out") for stl in (folder / "out").glob("*.stl")]
     if model.stickers_file.exists():
         model_files.append((str(model.stickers_file), f"models/{folder.name}/out"))
 

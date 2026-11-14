@@ -21,6 +21,7 @@ import build123d  # noqa: F401
 import numpy as np
 from PIL import Image, ImageDraw
 
+from mesh import read_stl, split_long_triangles
 from models import ROOT
 
 MM_PER_INCH = 25.4
@@ -59,25 +60,6 @@ def run_script(script, changes, out_dir):
     sys.path.insert(0, str(script.parent))
     sys.argv = [str(script)]
     exec(compile(tree, str(script), "exec"), {"__name__": "__main__", "__file__": str(script)})
-
-
-def read_stl(path):
-    """The corners of each triangle in a binary STL, as an array of shape (triangles, 3, 3)."""
-    record = [("normal", "<f4", 3), ("corners", "<f4", (3, 3)), ("attribute", "<u2")]
-    return np.fromfile(path, dtype=record, offset=84)["corners"].astype(float)
-
-
-def split_long_triangles(triangles):
-    """Split long triangles into four, because each is drawn in order of its average depth."""
-    limit = np.ptp(triangles.reshape(-1, 3), axis=0).max() / 20
-    for _ in range(4):
-        edges = np.linalg.norm(triangles - np.roll(triangles, 1, axis=1), axis=2).max(axis=1)
-        long = edges > limit
-        a, b, c = (triangles[long, i] for i in range(3))
-        ab, bc, ca = (a + b) / 2, (b + c) / 2, (c + a) / 2
-        pieces = [(a, ab, ca), (ab, b, bc), (ca, bc, c), (ab, bc, ca)]
-        triangles = np.concatenate([triangles[~long]] + [np.stack(p, axis=1) for p in pieces])
-    return triangles
 
 
 def render(triangles, path):

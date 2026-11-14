@@ -23,6 +23,7 @@ from tkinterdnd2 import TkinterDnD
 from models import FROZEN, ROOT, Model, find_models
 from stickers import StickerEditor, read_stickers, write_templates
 from updates import Updater, run_install_hooks
+from viewer import Viewer, part_files
 
 MM_PER_INCH = 25.4
 # updates replace the installed app's folder, so an installed copy keeps its files in Documents
@@ -158,6 +159,7 @@ class App:
         self.job = None
         self.pending = None     # the timer waiting for typing to pause
         self.image = None
+        self.viewer = None
         self.lines = queue.Queue()
         # with a spare, a change can kill the running job and start at once. Without one, it waits
         # for that job to finish, because loading a new worker would take longer. The spare starts
@@ -248,8 +250,10 @@ class App:
                                         state="disabled")
         self.sticker_button = ttk.Button(buttons, text="Make stickers", command=self.open_stickers,
                                          state="disabled")
+        self.view_button = ttk.Button(buttons, text="View in 3D", command=self.open_viewer,
+                                      state="disabled")
         for column, button in enumerate((self.save_button, self.cancel_button, self.reset_button,
-                                         self.folder_button, self.sticker_button)):
+                                         self.folder_button, self.sticker_button, self.view_button)):
             button.grid(row=0, column=column, padx=(0, 6))
 
         self.progress = ttk.Progressbar(frame, mode="indeterminate")
@@ -315,6 +319,21 @@ class App:
         # the sizes aren't known while a build is running or after one has failed
         can_make = self.stickers() and not updating and key not in self.failed
         self.sticker_button.configure(state="normal" if can_make else "disabled")
+        # the parts are being rewritten while a build runs, so the 3D view waits for it to finish
+        can_view = part_files(self.parts_folder()) and not updating
+        self.view_button.configure(state="normal" if can_view else "disabled")
+        if can_view and self.viewer and not self.viewer.closed:
+            self.viewer.show(self.model.title, self.parts_folder())
+
+    def parts_folder(self):
+        """The folder with the STL files of the build in the picture, or of the default model."""
+        return self.shown.get(self.model.key) or self.model.script.parent / "out"
+
+    def open_viewer(self):
+        if not self.viewer or self.viewer.closed:
+            self.viewer = Viewer(self.root, self.scale)
+        self.viewer.show(self.model.title, self.parts_folder())
+        self.viewer.lift()
 
     def stickers(self):
         """The sticker sizes of the build in the picture, or of the default model."""
