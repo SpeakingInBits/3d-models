@@ -8,11 +8,18 @@ Two hooks are built into the top of each basket's back wall, so there's nothing 
 Each sits on the frame's inner lip and wraps over the top of the frame, and the basket's rim ends up
 level with the lip.
 
+A flat plate along the bottom of the back wall reaches out to the glass. The hooks hold the top of
+the basket 11 mm in from the glass (the 10 mm lip plus a 1 mm gap), and without the plate the
+basket's weight swings its bottom in towards the glass. The plate's edge rests on the glass, so the
+basket hangs straight.
+
 | Basket | Two on the end wall | Back, with the hooks |
 |---|---|---|
 | ![Basket](out/preview_angle.png) | ![In the tank](out/preview_in_tank.png) | ![Back](out/preview_back.png) |
 
-![A hook cut through, on the frame](out/preview_hook_section.png)
+| A hook cut through, on the frame | Hanging straight, with the plate on the glass |
+|---|---|
+| ![A hook cut through, on the frame](out/preview_hook_section.png) | ![Side section](out/preview_side.png) |
 
 ## Printing
 
@@ -21,7 +28,7 @@ any additives or colourants you wouldn't put in a tank.
 
 | File | Print | Notes |
 |---|---|---|
-| [out/basket.stl](out/basket.stl) | 2 | 127.5 × 118 mm footprint with the hooks, 152 mm tall. Prints open top up. |
+| [out/basket.stl](out/basket.stl) | 2 | 127.5 × 117 mm footprint with the hooks, 152 mm tall. Prints open top up. |
 
 The hooks reach out over the frame, so they need supports. In PrusaSlicer, set **Supports** to
 **For build plate only** and the **Style** to **Organic**. Keep **Don't support bridges** on (it
@@ -31,6 +38,7 @@ behind the basket. Snap them off after printing.
 Everything else prints without supports:
 - The wall openings are about 8 mm square, and their tops are short flat bridges.
 - The floor has 6 mm openings, small enough to hold gravel or clay pebbles.
+- The plate on the back sits on the build plate, level with the floor.
 - Inside the back wall, a gusset under each hook stiffens the joint. Its underside slopes at 45°.
 - Solid bands run around the rim, the bottom and either side of each corner for stiffness.
 
@@ -49,6 +57,9 @@ hooks are made for 13.3 mm. Each hook's leg down the outside of the tank is 2 in
 overall. The hooks are the same shape as the [planter's](../aquarium-planter/) clip-on hook, so
 printing that hook first is a quick way to check the fit before printing the baskets.
 
+The plate at the bottom reaches 11 mm out from the back wall, to where the glass is: in line with
+the frame's inner wall, behind the lip. If your glass is set further back, raise `STANDOFF_PRESS`.
+
 About 115 mm of each basket sits under water when the water is 25 mm below the lip.
 
 ## Customising
@@ -65,6 +76,8 @@ you're most likely to change:
 | `OPENING` | 287 | The end wall's length between the lip edges. |
 | `FRAME_TOP_W`, `FRAME_CLEAR` | 13.3, 0.8 | Raise them if the hooks won't go over the frame. Lower them if the basket leans into the tank. |
 | `LEG_L` | 50.8 | Overall length of each hook's leg down the outside of the tank (2 in). |
+| `STANDOFF_T` | 3 | Thickness of the plate that rests on the glass. 0 leaves it off. |
+| `STANDOFF_PRESS` | 0 | How far past the glass the plate reaches. Raise it to push the bottom out harder. |
 
 Rebuild and re-render from the repo root:
 
