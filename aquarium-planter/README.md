@@ -63,6 +63,11 @@ back faces the nearest tank wall.
 Each hook drops onto the basket's back wall, where the slots stop to make room for it. Its pad
 sits on the lip, and its arm goes over the top of the frame to a leg down the outside. The leg is
 what keeps the planter from tipping into the tank. The planter's rim ends up level with the lip.
+
+The arm over the frame is 5 mm thick (`HOOK_T`), and so is the inside corner where it leaves the
+pad. The first hooks had a 3 mm arm, and the 45° slope up to it left that corner only 2 mm thick.
+That's where the hook bends when its leg is pushed out, and the same hooks on the
+[aquarium basket](../aquarium-basket/) snapped there.
 Water usually sits a little below the lip, so about 35 mm of the cup and basket is under water.
 
 ## Measuring your tank

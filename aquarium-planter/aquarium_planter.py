@@ -58,7 +58,7 @@ BASKET_HOLE_PITCH = 6.5
 
 # ---------------------------------------------------------------- hooks
 HOOK_W = 20.0          # along the tank wall
-HOOK_T = 3.0           # thickness of the hook's top and its riser
+HOOK_T = 5.0           # thickness of the arm over the frame, and the least anywhere above the pad
 RIM_ABOVE_LIP = 0.0    # planter rim height above the lip when it hangs from the hooks
 BACK_GAP = 3.5         # planter's back wall to the lip edge; room for the hook's outer leg
 SADDLE_L = 15.0        # how far the hook's legs reach down either side of the basket's back wall
@@ -120,7 +120,8 @@ def box(x0, x1, y0, y1, z0, z1):
 
 def prism_x(yz_pts, x0, width):
     """Extrude a closed (y, z) outline along X, centred on x0."""
-    face = make_face(Polyline(*[Vector(x0 - width / 2, y, z) for y, z in yz_pts], close=True))
+    pts = [p for i, p in enumerate(yz_pts) if p != yz_pts[i - 1]]   # no repeated corners
+    face = make_face(Polyline(*[Vector(x0 - width / 2, y, z) for y, z in pts], close=True))
     return extrude(face, amount=width, dir=(1, 0, 0))
 
 
@@ -224,10 +225,15 @@ def hook_profile():
     leg_out = leg_in + LEG_T
     leg_bottom = arm_top - LEG_L
     top = rim + HOOK_T
-    ramp = arm_top - top                     # 45 degree rise from the saddle up to the arm
+    # the top rises at 45 degrees from over the saddle to the arm. It starts far enough back that
+    # the hook is HOOK_T thick across the inside corner where the arm leaves the pad, which is where
+    # it bends when the leg is pushed out; the first basket hooks were only 2 mm thick there and snapped
+    saddle_back = wall_in - c - SADDLE_T
+    ramp_start = max(saddle_back, pad_back + top - arm_under - HOOK_T * sqrt(2))
+    ramp_end = ramp_start + arm_top - top
     return [
-        (wall_in - c - SADDLE_T, rim - SADDLE_L), (wall_in - c - SADDLE_T, top),
-        (0.0, top), (ramp, arm_top), (leg_out, arm_top), (leg_out, leg_bottom),
+        (saddle_back, rim - SADDLE_L), (saddle_back, top),
+        (ramp_start, top), (ramp_end, arm_top), (leg_out, arm_top), (leg_out, leg_bottom),
         (leg_in + LEG_CHAMFER, leg_bottom), (leg_in, leg_bottom + LEG_CHAMFER), (leg_in, arm_under),
         (pad_back, arm_under), (pad_back, 0.0), (wall_out + c + SADDLE_T, 0.0),
         (wall_out + c + SADDLE_T, rim - SADDLE_L), (wall_out + c, rim - SADDLE_L),
