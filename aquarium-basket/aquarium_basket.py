@@ -46,7 +46,7 @@ CORNER_BAND = 6.0      # solid strip either side of each corner
 
 # ---------------------------------------------------------------- hooks
 HOOK_W = 20.0          # along the tank wall
-HOOK_T = 3.0           # thickness of the hook's top and its riser
+HOOK_T = 5.0           # thickness of the arm over the frame, and the least anywhere above the pad
 RIM_ABOVE_LIP = 0.0    # basket rim height above the lip
 BACK_GAP = 1.0         # basket's back wall to the lip edge
 HOOK_ROOT = 12.0       # how far down the back wall the hook is joined on; the wall is solid there
@@ -59,7 +59,7 @@ HOOK_INSET = 20.0      # from each end of the basket to the middle of its hook
 # ---------------------------------------------------------------- glass standoff
 STANDOFF_T = 3.0       # flat plate at the bottom of the back wall that rests on the glass; 0 for none
 STANDOFF_W = 40.0      # its length along the wall, centred; anything over the basket's length runs full
-STANDOFF_PRESS = 0.0   # how far past the glass it reaches; raise it to push the bottom out harder
+STANDOFF_PRESS = 2.0   # how far past the glass it reaches; raise it to push the bottom out harder
 
 OUT = Path(__file__).parent / "out"
 
@@ -72,7 +72,7 @@ assert HOOK_XS[1] - HOOK_XS[0] >= HOOK_W + 20, \
     f"the basket is too narrow for two hooks: make it at least {2 * HOOK_INSET + HOOK_W + 20:.0f} mm wide"
 assert HOOK_ROOT >= GUSSET + 4 and RIM_ABOVE_LIP < HOOK_ROOT, "the hook's root is too short"
 assert LENGTH <= 250 and DEPTH + BACK_GAP + LIP_W + FRAME_TOP_W + 5 <= 210 \
-    and HEIGHT + LIP_DROP + 5 <= 220, "the basket won't fit on the MK4"
+    and HEIGHT - RIM_ABOVE_LIP + LIP_DROP + FRAME_CLEAR + HOOK_T <= 220, "the basket won't fit on the MK4"
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -86,7 +86,8 @@ def rounded_box(x0, x1, y0, y1, z0, z1, r):
 
 def prism_x(yz_pts, x0, width):
     """Extrude a closed (y, z) outline along X, centred on x0."""
-    face = make_face(Polyline(*[Vector(x0 - width / 2, y, z) for y, z in yz_pts], close=True))
+    pts = [p for i, p in enumerate(yz_pts) if p != yz_pts[i - 1]]   # no repeated corners
+    face = make_face(Polyline(*[Vector(x0 - width / 2, y, z) for y, z in pts], close=True))
     return extrude(face, amount=width, dir=(1, 0, 0))
 
 
@@ -174,9 +175,13 @@ def hook_profile():
     leg_out = leg_in + LEG_T
     leg_bottom = arm_top - LEG_L
     top = rim + HOOK_T
-    ramp = arm_top - top                     # 45 degree rise from the rim up to the arm
+    # the top rises at 45 degrees from over the wall to the arm. It starts far enough back that the
+    # hook is HOOK_T thick across the inside corner where the arm leaves the pad, which is where it
+    # bends when the leg is pushed out; the first hooks were only 2 mm thick there and snapped
+    ramp_start = max(wall_in - GUSSET, pad_back + top - arm_under - HOOK_T * 2 ** 0.5)
+    ramp_end = ramp_start + arm_top - top
     return [
-        (wall_in - GUSSET, top), (0.0, top), (ramp, arm_top), (leg_out, arm_top),
+        (wall_in - GUSSET, top), (ramp_start, top), (ramp_end, arm_top), (leg_out, arm_top),
         (leg_out, leg_bottom), (leg_in + LEG_CHAMFER, leg_bottom),
         (leg_in, leg_bottom + LEG_CHAMFER), (leg_in, arm_under), (pad_back, arm_under),
         (pad_back, 0.0), (wall_out, 0.0), (wall_out, rim - HOOK_ROOT), (wall_in, rim - HOOK_ROOT),
